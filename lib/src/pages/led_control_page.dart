@@ -32,7 +32,7 @@ class _LedControlPageState extends State<LedControlPage> {
                 MaterialStateProperty.all(Theme.of(context).errorColor),
           ),
           onPressed: () {
-            Provider.of<LedsModel>(context).refreshData();
+            Provider.of<LedsModel>(context, listen: false).refreshData();
           },
           child: Text(
             'Retry',
