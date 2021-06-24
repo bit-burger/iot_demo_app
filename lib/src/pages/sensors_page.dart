@@ -22,35 +22,37 @@ class _SensorsPageState extends State<SensorsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: FutureBuilder<SensorData>(
-        future: futureSensors,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return Center(
-              child: Padding(
-                padding: EdgeInsets.all(50),
-                child: Text(
-                  snapshot.data!.temperature.toString(),
+    return SafeArea(
+      child: Center(
+        child: FutureBuilder<SensorData>(
+          future: futureSensors,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return Center(
+                child: Padding(
+                  padding: EdgeInsets.all(50),
+                  child: Text(
+                    snapshot.data!.temperature.toString(),
+                  ),
                 ),
-              ),
-            );
-          } else if (snapshot.hasError) {
-            return Center(
-              child: Padding(
-                padding: EdgeInsets.all(50),
-                child: Text(
-                  'Something went wrong, '
-                  'make sure your sensors are connected, '
-                  'and your board is connected to your local wlan',
-                  textAlign: TextAlign.center,
+              );
+            } else if (snapshot.hasError) {
+              return Center(
+                child: Padding(
+                  padding: EdgeInsets.all(50),
+                  child: Text(
+                    'Something went wrong, '
+                    'make sure your sensors are connected, '
+                    'and your board is connected to your local wlan',
+                    textAlign: TextAlign.center,
+                  ),
                 ),
-              ),
-            );
-          }
-          // By default, show a loading spinner.
-          return CircularProgressIndicator();
-        },
+              );
+            }
+            // By default, show a loading spinner.
+            return CircularProgressIndicator();
+          },
+        ),
       ),
     );
   }
