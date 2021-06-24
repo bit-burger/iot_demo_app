@@ -1,0 +1,1 @@
+const String defaultUrl = 'http://iot-controller';

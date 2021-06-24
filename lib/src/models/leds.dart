@@ -8,14 +8,35 @@ class Leds {
     return Leds(ledValues: json.map((e) => Led.formJSON(e)).toList());
   }
 
-  factory Leds.unknown() {
-    return Leds(ledValues: List.generate(13, (index) => Led.empty()));
+  factory Leds.on() {
+    return Leds(ledValues: List.generate(12, (index) => Led.on()));
+  }
+
+  factory Leds.off() {
+    return Leds(ledValues: List.generate(12, (index) => Led.off()));
   }
 
   void allOff() {
     this.ledValues.forEach((led) {
       led.setRGB(0, 0, 0);
     });
+  }
+
+  bool get isCompletelyOnOrOff {
+    for (final led in ledValues) {
+      if (!(led.rgbValues.every((e) => e == 0) ||
+          led.rgbValues.every((e) => e == 255))) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  bool get isOff {
+    for (final led in ledValues) {
+      if (!led.isOff) return false;
+    }
+    return true;
   }
 
   void allOn() {
@@ -33,5 +54,11 @@ class Leds {
     json = json + "]";
     print("json: " + json);
     return json;
+  }
+
+  Leds copy() {
+    return new Leds(
+      ledValues: List.generate(ledValues.length, (i) => ledValues[i].copy()),
+    );
   }
 }

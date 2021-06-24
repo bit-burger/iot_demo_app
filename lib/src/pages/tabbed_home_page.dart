@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:iot_app/src/logic/app_config.dart';
-import 'package:iot_app/src/widgets/sensors_page.dart';
-import 'package:iot_app/src/widgets/settings_page.dart';
-
+import 'package:iot_app/src/models/leds_model.dart';
+// import 'sensors_page.dart';
+// import 'settings_page.dart';
 import 'led_control_page.dart';
+import 'package:provider/provider.dart';
 
 class TabbedHomePage extends StatelessWidget {
-  const TabbedHomePage(this.appConfig);
-  final AppConfig appConfig;
-
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: 1,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('IOT-Control-App'),
@@ -20,8 +17,8 @@ class TabbedHomePage extends StatelessWidget {
             isScrollable: true,
             tabs: [
               Tab(text: 'LEDControl'),
-              Tab(text: 'Sensors'),
-              Tab(text: 'Settings'),
+              //Tab(text: 'Sensors'),
+              //Tab(text: 'Settings'),
             ],
           ),
         ),
@@ -29,10 +26,18 @@ class TabbedHomePage extends StatelessWidget {
           bottom: false,
           child: TabBarView(
             children: [
-              LEDControlPage(appConfig),
-              SensorsPage(appConfig),
-              SettingsPage(appConfig),
+              LedControlPage(),
+              //SensorsPage(),
+              //SettingsPage(),
             ],
+          ),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Provider.of<LedsModel>(context, listen: false).refreshData();
+          },
+          child: Icon(
+            Icons.refresh,
           ),
         ),
       ),
