@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:iot_app/src/logic/app_config.dart';
-import 'package:iot_app/src/logic/led.dart';
+import 'package:iot_app/src/logic/leds.dart';
 
 class LEDControlPage extends StatefulWidget {
   LEDControlPage(this.appConfig, {Key? key}) : super(key: key);
