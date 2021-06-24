@@ -46,12 +46,12 @@ class _LedControlPageState extends State<LedControlPage> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Center(
-        child: Consumer<LedsModel>(
-          builder: (context, ledsModel, _) {
-            final state = ledsModel.ledState;
-            return Padding(
-              padding: EdgeInsets.all(60),
-              child: Column(
+        child: Padding(
+          padding: EdgeInsets.all(60),
+          child: Consumer<LedsModel>(
+            builder: (context, ledsModel, _) {
+              final state = ledsModel.ledState;
+              return Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Expanded(
@@ -70,9 +70,9 @@ class _LedControlPageState extends State<LedControlPage> {
                     ),
                   )
                 ],
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );
