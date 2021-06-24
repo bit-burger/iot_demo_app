@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:iot_app/src/logic/app_config.dart';
-import 'package:iot_app/src/logic/sensors.dart';
+import 'package:iot_app/src/models/leds_model.dart';
+import 'package:iot_app/src/models/sensors.dart';
+import 'package:provider/provider.dart';
 
 class SensorsPage extends StatefulWidget {
   SensorsPage(this.appConfig, {Key? key}) : super(key: key);
@@ -10,13 +12,12 @@ class SensorsPage extends StatefulWidget {
   final AppConfig appConfig;
 
   @override
-  _SensorsPageState createState() => _SensorsPageState(appConfig);
+  _SensorsPageState createState() => _SensorsPageState();
 }
 
 class _SensorsPageState extends State<SensorsPage> {
-  final AppConfig appConfig;
   late Future<Sensors> futureSensors;
-  _SensorsPageState(this.appConfig);
+  _SensorsPageState();
 
   @override
   void initState() {
@@ -59,9 +60,10 @@ class _SensorsPageState extends State<SensorsPage> {
     );
   }
 
-  Future<Sensors> fetchSensorState(AppConfig appConfig) async {
+  Future<Sensors> fetchSensorState() async {
+    final url = Provider.of<LedsModel>(context, listen: false).url;
     final response =
-        await http.get(Uri.parse(appConfig.iotControllerUrl + '/sensors'));
+        await http.get(Uri.parse(url + '/sensors'));
 
     if (response.statusCode == 200) {
       return Sensors.fromJson(jsonDecode(response.body));

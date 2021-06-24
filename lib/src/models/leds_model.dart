@@ -77,20 +77,17 @@ class LedsModel extends ChangeNotifier {
   }
 
   refreshData() async {
-    _ledState = LedState.loading;
-    nL();
-    try {
-      final leds = await _getLeds();
-      if (!leds.isCompletelyOnOrOff) {
-        _ledState = LedState.on;
-        _ledConfiguration = leds;
-      } else {
-        _ledState = leds.isOff ? LedState.off: LedState.on;
-      }
-    } on Exception {
-      _ledState = LedState.error;
-    }
-    nL();
+    _updateLeds(
+      () => _getLeds(),
+      forceOverrideConfiguration: true,
+    );
+  }
+
+  resetLeds() async {
+    _updateLeds(
+      () async => Leds.off(),
+      forceOverrideConfiguration: true,
+    );
   }
 
   _updateLeds(
@@ -109,7 +106,7 @@ class LedsModel extends ChangeNotifier {
         _ledConfiguration = leds;
       } else {
         if (forceOverrideConfiguration) _ledConfiguration = leds;
-        _ledState = leds.isOff ? LedState.off: LedState.on;
+        _ledState = leds.isOff ? LedState.off : LedState.on;
       }
     } on Exception {
       _ledState = LedState.error;
@@ -123,7 +120,7 @@ class LedsModel extends ChangeNotifier {
   }
 
   Future<Leds> _setLeds(Leds leds) async {
-    print(leds.ledValues.length);
+    print('Client: ' + leds.toJson());
     final response = await http.put(
       Uri.parse(_url + '/leds'),
       headers: <String, String>{
@@ -135,15 +132,15 @@ class LedsModel extends ChangeNotifier {
   }
 
   Leds _processResponse(http.Response response) {
-    print('RETURN: ' + response.body);
     if (response.statusCode == 200) {
-      return Leds.fromJSON(convert.jsonDecode(response.body));
+      final leds = Leds.fromJSON(convert.jsonDecode(response.body));
+      print('Micro: ' + leds.toJson());
+      return leds;
     }
     throw Exception();
   }
 
   void nL() {
-    print('Notify listeners');
     notifyListeners();
   }
 }

@@ -10,14 +10,13 @@ class LedControlPage extends StatefulWidget {
 
 class _LedControlPageState extends State<LedControlPage> {
   _buildLowerWidget(BuildContext context, LedState ledState) {
-    switch(ledState) {
+    switch (ledState) {
       case LedState.on:
       case LedState.off:
         return Switch.adaptive(
           value: ledState == LedState.on,
           onChanged: (v) {
-            final ledsModel =
-            Provider.of<LedsModel>(context, listen: false);
+            final ledsModel = Provider.of<LedsModel>(context, listen: false);
             if (v) {
               return ledsModel.turnOn();
             }
@@ -29,16 +28,20 @@ class _LedControlPageState extends State<LedControlPage> {
       case LedState.error:
         return TextButton(
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all(Theme.of(context).errorColor),
-            textStyle: MaterialStateProperty.all(Theme.of(context).inputDecorationTheme.errorStyle),
+            backgroundColor:
+                MaterialStateProperty.all(Theme.of(context).errorColor),
           ),
           onPressed: () {
             Provider.of<LedsModel>(context).refreshData();
           },
-          child: Text('Retry'),
+          child: Text(
+            'Retry',
+            style: Theme.of(context).primaryTextTheme.button,
+          ),
         );
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -46,25 +49,28 @@ class _LedControlPageState extends State<LedControlPage> {
         child: Consumer<LedsModel>(
           builder: (context, ledsModel, _) {
             final state = ledsModel.ledState;
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Expanded(
-                  child: Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Text(state.toStringLong()),
+            return Padding(
+              padding: EdgeInsets.all(60),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Text(state.toStringLong()),
+                    ),
                   ),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                Expanded(
-                  child: Align(
-                    alignment: Alignment.topCenter,
-                    child: _buildLowerWidget(context, ledsModel.ledState),
+                  SizedBox(
+                    height: 10,
                   ),
-                )
-              ],
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: _buildLowerWidget(context, ledsModel.ledState),
+                    ),
+                  )
+                ],
+              ),
             );
           },
         ),
