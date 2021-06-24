@@ -14,21 +14,21 @@ class LEDControlPage extends StatefulWidget {
 }
 
 class _LEDControlPageState extends State<LEDControlPage> {
-  LEDs currentLEDState = LEDs.unknown();
+  Leds currentLEDState = Leds.unknown();
   final AppConfig appConfig;
 
   _LEDControlPageState(this.appConfig);
 
   void _switchOff() {
     setState(() {
-      currentLEDState.allOFF();
+      currentLEDState.allOff();
       setLEDStatus(appConfig, currentLEDState);
     });
   }
 
   void _switchOn() {
     setState(() {
-      currentLEDState.allON();
+      currentLEDState.allOn();
       setLEDStatus(appConfig, currentLEDState);
     });
   }
@@ -59,7 +59,7 @@ class _LEDControlPageState extends State<LEDControlPage> {
     );
   }
 
-  Future<LEDs> fetchLEDsState(AppConfig appConfig) async {
+  Future<Leds> fetchLEDsState(AppConfig appConfig) async {
     print("calling: " + appConfig.iotControllerUrl + '/leds');
     final response =
         await http.get(Uri.parse(appConfig.iotControllerUrl + '/leds'));
@@ -67,7 +67,7 @@ class _LEDControlPageState extends State<LEDControlPage> {
     if (response.statusCode == 200) {
       // If the server did return a 200 OK response,
       // then parse the JSON.
-      currentLEDState = LEDs.fromJSON(jsonDecode(response.body));
+      currentLEDState = Leds.fromJSON(jsonDecode(response.body));
       return currentLEDState;
     } else {
       // If the server did not return a 200 OK response,
@@ -76,7 +76,7 @@ class _LEDControlPageState extends State<LEDControlPage> {
     }
   }
 
-  Future<http.Response> setLEDStatus(AppConfig appConfig, LEDs led) {
+  Future<http.Response> setLEDStatus(AppConfig appConfig, Leds led) {
     return http.put(
       Uri.parse(appConfig.iotControllerUrl + '/leds'),
       headers: <String, String>{

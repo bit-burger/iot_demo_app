@@ -26,25 +26,25 @@ class Led {
   }
 }
 
-class LEDs {
+class Leds {
   final List<Led> ledValues;
-  LEDs({required this.ledValues});
+  Leds({required this.ledValues});
 
-  factory LEDs.fromJSON(List<dynamic> json) {
-    return LEDs(ledValues: json.map((e) => Led.formJSON(e)).toList());
+  factory Leds.fromJSON(List<dynamic> json) {
+    return Leds(ledValues: json.map((e) => Led.formJSON(e)).toList());
   }
 
-  factory LEDs.unknown() {
-    return LEDs(ledValues: List.generate(13, (index) => Led.empty()));
+  factory Leds.unknown() {
+    return Leds(ledValues: List.generate(13, (index) => Led.empty()));
   }
 
-  void allOFF() {
+  void allOff() {
     this.ledValues.forEach((led) {
       led.setRGB(0, 0, 0);
     });
   }
 
-  void allON() {
+  void allOn() {
     this.ledValues.forEach((led) {
       led.setRGB(255, 255, 255);
     });
