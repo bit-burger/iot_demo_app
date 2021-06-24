@@ -32,12 +32,17 @@ class TabbedHomePage extends StatelessWidget {
             ],
           ),
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Provider.of<LedsModel>(context, listen: false).refreshData();
+        floatingActionButton: GestureDetector(
+          onLongPress: () {
+            Provider.of<LedsModel>(context, listen: false).resetLeds();
           },
-          child: Icon(
-            Icons.refresh,
+          child: FloatingActionButton(
+            onPressed: () {
+              Provider.of<LedsModel>(context, listen: false).refreshData();
+            },
+            child: Icon(
+              Icons.refresh,
+            ),
           ),
         ),
       ),
