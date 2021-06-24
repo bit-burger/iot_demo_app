@@ -1,14 +1,14 @@
-class Sensors {
+class SensorData {
   final double temperature;
   final double humidity;
 
-  Sensors({
+  SensorData({
     required this.temperature,
     required this.humidity,
   });
 
-  factory Sensors.fromJson(Map<String, dynamic> json) {
-    return Sensors(
+  factory SensorData.fromJson(Map<String, dynamic> json) {
+    return SensorData(
         temperature: json['temperature'], humidity: json['humidity']);
   }
 }

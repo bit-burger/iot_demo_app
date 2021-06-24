@@ -6,9 +6,6 @@ import 'package:iot_app/src/models/sensor_data.dart';
 import 'package:provider/provider.dart';
 
 class SensorsPage extends StatefulWidget {
-  SensorsPage(this.appConfig, {Key? key}) : super(key: key);
-
-  final AppConfig appConfig;
 
   @override
   _SensorsPageState createState() => _SensorsPageState();
@@ -20,13 +17,13 @@ class _SensorsPageState extends State<SensorsPage> {
   @override
   void initState() {
     super.initState();
-    futureSensors = fetchSensorState(appConfig);
+    futureSensors = fetchSensorState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: FutureBuilder<Sensors>(
+      child: FutureBuilder<SensorData>(
         future: futureSensors,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
@@ -64,7 +61,7 @@ class _SensorsPageState extends State<SensorsPage> {
         await http.get(Uri.parse(url + '/sensors'));
 
     if (response.statusCode == 200) {
-      return Sensors.fromJson(jsonDecode(response.body));
+      return SensorData.fromJson(jsonDecode(response.body));
     } else {
       throw Exception('Failed to load sensor-data');
     }
