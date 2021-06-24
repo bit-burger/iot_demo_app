@@ -57,7 +57,7 @@ class LEDs {
       if (i < this.ledValues.length - 1) json = json + ",";
     }
     json = json + "]";
-    print("json: ${json}");
+    print("json: " + json);
     return json;
   }
 }
