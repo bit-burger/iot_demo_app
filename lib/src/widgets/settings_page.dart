@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:iot_app/appconfig.dart';
+import 'package:iot_app/src/logic/app_config.dart';
 
 class SettingsPage extends StatefulWidget {
   SettingsPage(this.appConfig);
@@ -11,7 +11,7 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsState extends State<SettingsPage> {
   // of the TextField.
-  var textController;
+  late TextEditingController textController;
 
   final AppConfig appConfig;
 

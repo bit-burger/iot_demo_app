@@ -1,36 +1,24 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:iot_app/appconfig.dart';
+import 'package:iot_app/src/logic/app_config.dart';
+import 'package:iot_app/src/logic/sensors.dart';
 
-class Sensors {
-  final double temperature;
-  final double humidity;
 
-  Sensors({
-    required this.temperature,
-    required this.humidity,
-  });
 
-  factory Sensors.fromJson(Map<String, dynamic> json) {
-    return Sensors(
-        temperature: json['temperature'], humidity: json['humidity']);
-  }
-}
-
-class SensorPage extends StatefulWidget {
-  SensorPage(this.appConfig, {Key? key}) : super(key: key);
+class SensorsPage extends StatefulWidget {
+  SensorsPage(this.appConfig, {Key? key}) : super(key: key);
 
   final AppConfig appConfig;
 
   @override
-  _SensorPageState createState() => _SensorPageState(appConfig);
+  _SensorsPageState createState() => _SensorsPageState(appConfig);
 }
 
-class _SensorPageState extends State<SensorPage> {
+class _SensorsPageState extends State<SensorsPage> {
   final AppConfig appConfig;
   late Future<Sensors> futureSensors;
-  _SensorPageState(this.appConfig);
+  _SensorsPageState(this.appConfig);
 
   @override
   void initState() {
