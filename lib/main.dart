@@ -19,6 +19,7 @@ class MyApp extends StatelessWidget {
       },
       child: MaterialApp(
         title: 'Flutter IoT Control',
+        debugShowCheckedModeBanner: false,
         home: TabbedHomePage(),
       ),
     );
