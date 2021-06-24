@@ -85,7 +85,7 @@ class LedsModel extends ChangeNotifier {
 
   resetLeds() async {
     _updateLeds(
-      () async => Leds.off(),
+      () async => _setLeds(Leds.off()),
       forceOverrideConfiguration: true,
     );
   }
