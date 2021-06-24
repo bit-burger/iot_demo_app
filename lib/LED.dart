@@ -1,28 +1,28 @@
 import 'dart:convert';
 
 class LED {
-  final List<int> rgbVals;
-  LED({required this.rgbVals});
+  final List<int> rgbValues;
+  LED({required this.rgbValues});
 
   factory LED.empty() {
-    return LED(rgbVals: [0, 0, 0]);
+    return LED(rgbValues: [0, 0, 0]);
   }
   factory LED.formJSON(List<dynamic> json) {
-    return LED(rgbVals: json.map((e) => e as int).toList());
+    return LED(rgbValues: json.map((e) => e as int).toList());
   }
   setRGB(int r, int g, int b) {
-    this.rgbVals[0] = r;
-    this.rgbVals[1] = g;
-    this.rgbVals[2] = b;
+    this.rgbValues[0] = r;
+    this.rgbValues[1] = g;
+    this.rgbValues[2] = b;
   }
 
   @override
   String toString() {
-    return 'r: ${rgbVals[0]} g: ${rgbVals[1]} b: ${rgbVals[2]}';
+    return 'r: ${rgbValues[0]} g: ${rgbValues[1]} b: ${rgbValues[2]}';
   }
 
   String toJson() {
-    return jsonEncode(rgbVals);
+    return jsonEncode(rgbValues);
   }
 }
 

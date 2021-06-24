@@ -60,9 +60,9 @@ class _LEDControlPageState extends State<LEDControlPage> {
   }
 
   Future<LEDs> fetchLEDsState(AppConfig appConfig) async {
-    print("calling: " + appConfig.iot_controller_url + '/leds');
+    print("calling: " + appConfig.iotControllerUrl + '/leds');
     final response =
-        await http.get(Uri.parse(appConfig.iot_controller_url + '/leds'));
+        await http.get(Uri.parse(appConfig.iotControllerUrl + '/leds'));
 
     if (response.statusCode == 200) {
       // If the server did return a 200 OK response,
@@ -78,7 +78,7 @@ class _LEDControlPageState extends State<LEDControlPage> {
 
   Future<http.Response> setLEDStatus(AppConfig appConfig, LEDs led) {
     return http.put(
-      Uri.parse(appConfig.iot_controller_url + '/leds'),
+      Uri.parse(appConfig.iotControllerUrl + '/leds'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },

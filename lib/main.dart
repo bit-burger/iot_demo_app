@@ -3,8 +3,6 @@ import 'package:iot_app/appconfig.dart';
 import 'package:iot_app/settings.dart';
 import 'package:iot_app/sensors.dart';
 
-import 'dart:async';
-import 'dart:convert';
 import 'package:iot_app/ledcontrol.dart';
 
 void main() {
@@ -12,7 +10,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  AppConfig appConfig = new AppConfig();
+  final AppConfig appConfig = new AppConfig();
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {

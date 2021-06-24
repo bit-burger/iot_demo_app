@@ -58,7 +58,7 @@ class _SensorPageState extends State<SensorPage> {
 
   Future<Sensors> fetchSensorState(AppConfig appConfig) async {
     final response =
-        await http.get(Uri.parse(appConfig.iot_controller_url + '/sensors'));
+        await http.get(Uri.parse(appConfig.iotControllerUrl + '/sensors'));
 
     if (response.statusCode == 200) {
       return Sensors.fromJson(jsonDecode(response.body));

@@ -16,7 +16,7 @@ class _SettingsState extends State<SettingsPage> {
   final AppConfig appConfig;
 
   _SettingsState(this.appConfig) {
-    textController = TextEditingController(text: appConfig.iot_controller_url);
+    textController = TextEditingController(text: appConfig.iotControllerUrl);
   }
 
   @override
@@ -32,7 +32,7 @@ class _SettingsState extends State<SettingsPage> {
         // When the user presses the button, show an alert dialog containing
         // the text that the user has entered into the text field.
         onPressed: () {
-          appConfig.iot_controller_url = textController.text;
+          appConfig.iotControllerUrl = textController.text;
           showDialog(
             context: context,
             builder: (context) {
