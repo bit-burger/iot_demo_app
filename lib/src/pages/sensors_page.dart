@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:iot_app/src/logic/app_config.dart';
 import 'package:iot_app/src/models/leds_model.dart';
-import 'package:iot_app/src/models/sensors.dart';
+import 'package:iot_app/src/models/sensor_data.dart';
 import 'package:provider/provider.dart';
 
 class SensorsPage extends StatefulWidget {
@@ -16,8 +15,7 @@ class SensorsPage extends StatefulWidget {
 }
 
 class _SensorsPageState extends State<SensorsPage> {
-  late Future<Sensors> futureSensors;
-  _SensorsPageState();
+  late Future<SensorData> futureSensors;
 
   @override
   void initState() {
@@ -60,7 +58,7 @@ class _SensorsPageState extends State<SensorsPage> {
     );
   }
 
-  Future<Sensors> fetchSensorState() async {
+  Future<SensorData> fetchSensorState() async {
     final url = Provider.of<LedsModel>(context, listen: false).url;
     final response =
         await http.get(Uri.parse(url + '/sensors'));
