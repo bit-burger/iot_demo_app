@@ -4,8 +4,6 @@ import 'package:http/http.dart' as http;
 import 'package:iot_app/src/logic/app_config.dart';
 import 'package:iot_app/src/logic/sensors.dart';
 
-
-
 class SensorsPage extends StatefulWidget {
   SensorsPage(this.appConfig, {Key? key}) : super(key: key);
 
@@ -33,9 +31,26 @@ class _SensorsPageState extends State<SensorsPage> {
         future: futureSensors,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            return Text(snapshot.data!.temperature.toString());
+            return Center(
+              child: Padding(
+                padding: EdgeInsets.all(50),
+                child: Text(
+                  snapshot.data!.temperature.toString(),
+                ),
+              ),
+            );
           } else if (snapshot.hasError) {
-            return Text("${snapshot.error}");
+            return Center(
+              child: Padding(
+                padding: EdgeInsets.all(50),
+                child: Text(
+                  'Something went wrong, '
+                  'make sure your sensors are connected, '
+                  'and your board is connected to your local wlan',
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            );
           }
           // By default, show a loading spinner.
           return CircularProgressIndicator();
