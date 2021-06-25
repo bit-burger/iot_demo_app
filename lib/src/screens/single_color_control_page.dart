@@ -1,10 +1,8 @@
-// @dart=2.8
 import 'package:flutter/material.dart';
 import 'package:iot_app/src/models/led.dart';
 import 'package:iot_app/src/models/leds.dart';
 import 'package:iot_app/src/models/leds_model.dart';
-import 'package:iot_app/src/widgets/circle_widget.dart';
-import 'package:iot_app/src/widgets/circle_widget_layout.dart';
+import 'package:iot_app/src/widgets/multiple_circle_color_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:iot_app/src/models/led_state.dart';
 
@@ -57,19 +55,6 @@ class _SingleColorControlPageState extends State<SingleColorControlPage> {
     }
   }
 
-  Widget _getColorPicker(BuildContext context, int index, LedsModel ledsModel) {
-    final led = ledsModel.ledConfiguration.ledValues[index];
-    return CircleWidget(
-      selectedColor: led.toColor(),
-      onColorChange: (color) {
-        setState(() {
-          ledsModel.updateLed(index, Led.fromColor(color));
-        });
-        Navigator.of(context).pop();
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<LedsModel>(
@@ -82,21 +67,17 @@ class _SingleColorControlPageState extends State<SingleColorControlPage> {
                 child: Padding(
                   padding: EdgeInsets.all(60),
                   child: Center(
-                    child: CircleFloatingButton.completeCircle(
-                      radius: 105,
-                      child: CircleWidget(
-                        selectedColor: ledsModel.ledConfiguration.allSameValue
-                            ? ledsModel.ledConfiguration.ledValues.first
-                                .toColor()
-                            : null,
-                        onColorChange: (Color color) {
-                          ledsModel.updateLeds(Leds.all(Led.fromColor(color)));
-                        },
-                      ),
-                      items: List.generate(
-                          12,
-                          (index) =>
-                              _getColorPicker(context, index, ledsModel)),
+                    child: MultipleCircleColorPicker(
+                      selectedColors: ledsModel.ledConfiguration!.ledValues
+                          .map((e) => e.toColor())
+                          .toList(growable: false),
+                      onColorChanged: (int index, Color newColor) {
+                        ledsModel.updateLed(index, Led.fromColor(newColor));
+                        Navigator.of(context).pop();
+                      },
+                      onAllColorsChanged: (Color newColor) {
+                        ledsModel.updateLeds(Leds.all(Led.fromColor(newColor)));
+                      },
                     ),
                   ),
                 ),

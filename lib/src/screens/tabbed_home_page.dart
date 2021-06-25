@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:iot_app/src/models/leds_model.dart';
-// ignore: import_of_legacy_library_into_null_safe
-import 'package:iot_app/src/pages/single_color_control_page.dart';
+import 'single_color_control_page.dart';
 import 'sensors_page.dart';
 import 'settings_page.dart';
 import 'led_control_page.dart';

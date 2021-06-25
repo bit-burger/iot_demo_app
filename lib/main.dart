@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:iot_app/src/models/leds_model.dart';
-import 'package:iot_app/src/pages/tabbed_home_page.dart';
+import 'package:iot_app/src/screens/tabbed_home_page.dart';
 import 'package:provider/provider.dart';
 
 import 'constants.dart';
