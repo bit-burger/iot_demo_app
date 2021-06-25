@@ -31,6 +31,8 @@ dependencies:
   provider: ^5.0.0
   http: ^0.13.3
   o_color_picker: ^1.0.1
+  o_popup: ^1.0.0
+  radial_button: ^1.0.0+1
 
   
 dev_dependencies:

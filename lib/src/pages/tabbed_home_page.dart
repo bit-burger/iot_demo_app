@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:iot_app/src/models/leds_model.dart';
+// ignore: import_of_legacy_library_into_null_safe
+import 'package:iot_app/src/pages/single_color_control_page.dart';
 import 'sensors_page.dart';
 import 'settings_page.dart';
 import 'led_control_page.dart';
@@ -9,7 +11,7 @@ class TabbedHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('IOT-Control-App'),
@@ -17,6 +19,7 @@ class TabbedHomePage extends StatelessWidget {
             isScrollable: true,
             tabs: [
               Tab(text: 'LEDControl'),
+              Tab(text: 'ColorControl',),
               Tab(text: 'Sensors'),
               Tab(text: 'Settings'),
             ],
@@ -27,6 +30,7 @@ class TabbedHomePage extends StatelessWidget {
           child: TabBarView(
             children: [
               LedControlPage(),
+              SingleColorControlPage(),
               SensorsPage(),
               SettingsPage(),
             ],

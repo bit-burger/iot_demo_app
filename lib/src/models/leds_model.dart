@@ -22,12 +22,7 @@ class LedsModel extends ChangeNotifier {
 
   Leds? _ledConfiguration;
 
-  Leds get ledConfiguration {
-    if (isActive) {
-      return _ledConfiguration!;
-    }
-    throw Exception('Should only ask for this if checked for other states');
-  }
+  Leds? get ledConfiguration => _ledConfiguration;
 
   String get url => _url;
 
