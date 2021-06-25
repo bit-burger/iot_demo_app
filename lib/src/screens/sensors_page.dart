@@ -30,9 +30,17 @@ class _SensorsPageState extends State<SensorsPage> {
             if (snapshot.hasData) {
               return Center(
                 child: Padding(
-                  padding: EdgeInsets.all(50),
-                  child: Text(
-                    snapshot.data!.temperature.toString(),
+                  padding: EdgeInsets.all(25),
+                  child: Column(
+                    children: [
+                      ListTile(
+                        title: Text('Temperature: ' + snapshot.data!.temperature.toString() + "°C"),
+                      ),
+                      Divider(),
+                      ListTile(
+                        title: Text('Humidity: ' + snapshot.data!.humidity.toString() + "%"),
+                      ),
+                    ],
                   ),
                 ),
               );
