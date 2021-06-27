@@ -14,7 +14,7 @@ class CircleColorPicker extends StatelessWidget {
     this.onColorChange,
   });
 
-  _rotatedRedLine() => Transform.rotate(
+  Widget _rotatedRedLine() => Transform.rotate(
         angle: -math.pi / 4,
         child: Transform.scale(
           scale: 3,
@@ -35,14 +35,14 @@ class CircleColorPicker extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: selectedColor,
-        border: selectedColor == null ||
-            selectedColor!.computeLuminance() > 0.95
-            ? Border.all(color: Color(0xff969696), width: 1)
-            : null,
+        border:
+            selectedColor == null || selectedColor!.computeLuminance() > 0.95
+                ? Border.all(color: Color(0xff969696), width: 1)
+                : null,
         borderRadius: BorderRadius.all(Radius.circular(22)),
       ),
     );
-    if(onColorChange == null) {
+    if (onColorChange == null) {
       return colorCircle;
     }
     return ClipOval(

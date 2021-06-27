@@ -41,51 +41,51 @@ class LedsModel extends ChangeNotifier {
     }
   }
 
-  changeUrl(String newUrl) {
+  void changeUrl(String newUrl) {
     _url = newUrl;
     nL();
   }
 
   // if config is completely off make config full on
   // after that just use config to update
-  turnOn() async {
+  void turnOn() async {
     assert(!isOn);
     if (_ledConfiguration!.isOff) _ledConfiguration = Leds.on();
     _updateLeds(() => _setLeds(_ledConfiguration!));
   }
 
-  turnOff() async {
+  void turnOff() async {
     assert(isOn);
     _updateLeds(() => _setLeds(Leds.off()));
   }
 
-  updateLed(int replacingLedPosition, Led replacingLed) {
+  void updateLed(int replacingLedPosition, Led replacingLed) {
     assert(isActive);
     final ledCopy = _ledConfiguration!.copy();
     ledCopy.ledValues[replacingLedPosition] = replacingLed;
     _updateLeds(() => _setLeds(ledCopy));
   }
 
-  updateLeds(Leds newLeds) {
+  void updateLeds(Leds newLeds) {
     assert(isOn);
     _updateLeds(() => _setLeds(newLeds), forceOverrideConfiguration: true);
   }
 
-  refreshData() async {
+  void refreshData() async {
     _updateLeds(
       () => _getLeds(),
       forceOverrideConfiguration: true,
     );
   }
 
-  resetLeds() async {
+  void resetLeds() async {
     _updateLeds(
       () async => _setLeds(Leds.off()),
       forceOverrideConfiguration: true,
     );
   }
 
-  _updateLeds(
+  void _updateLeds(
     Future<Leds> updatingTask(), {
     bool forceOverrideConfiguration = false,
     bool notifyLoading = true,
