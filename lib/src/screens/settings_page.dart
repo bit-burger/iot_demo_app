@@ -65,7 +65,6 @@ class _SettingsState extends State<SettingsPage> {
           children: [
             TextField(
               textInputAction: TextInputAction.done,
-              // inputFormatters: [FilteringTextInputFormatter.deny(urlRegex)],
               controller: textController,
               onSubmitted: saveNewSettings,
               decoration: InputDecoration(
@@ -74,6 +73,7 @@ class _SettingsState extends State<SettingsPage> {
                     : !urlRegex.hasMatch(textController.text)
                         ? 'Not a valid url'
                         : null,
+                hintText: 'http://url-for-microcontroller',
               ),
             ),
             SizedBox(height: 20),
