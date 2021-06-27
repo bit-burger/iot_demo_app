@@ -22,21 +22,25 @@ class MultipleCircleColorPicker extends StatelessWidget {
     return CircleColorPicker(
       selectedColor: selectedColors[index],
       onColorChange: (Color newColor) => onColorChanged(index, newColor),
-
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return CircleFloatingButton.completeCircle(
-      radius: 105,
-      child: CircleColorPicker(
-        selectedColor: selectedColors.allSame() ? selectedColors.first : null,
-        onColorChange: onAllColorsChanged,
+    final padding =
+        (MediaQuery.of(context).size.width - radius - pickerSize* 1.5 + 10) / 2;
+    return Padding(
+      padding: EdgeInsets.all(padding),
+      child: CircleFloatingButton.completeCircle(
+        radius: 105,
+        child: CircleColorPicker(
+          selectedColor: selectedColors.allSame() ? selectedColors.first : null,
+          onColorChange: onAllColorsChanged,
+        ),
+        items: List.generate(12, (index) => _getColorPicker(context, index))
+            .reversed
+            .toList(),
       ),
-      items: List.generate(12, (index) => _getColorPicker(context, index))
-          .reversed
-          .toList(),
     );
   }
 }

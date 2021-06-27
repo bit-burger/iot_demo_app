@@ -64,22 +64,19 @@ class _ColorControlPageState extends State<ColorControlPage> {
           children: [
             if (ledsModel.ledConfiguration != null)
               SafeArea(
-                child: Padding(
-                  padding: EdgeInsets.all(60),
-                  child: Center(
-                    child: MultipleCircleColorPicker(
-                      selectedColors: ledsModel.ledConfiguration!.ledValues
-                          .map((e) => e.toColor())
-                          .toList(growable: false),
-                      onColorChanged: (int index, Color newColor) {
-                        ledsModel.updateLed(index, Led.fromColor(newColor));
-                        Navigator.of(context).pop();
-                      },
-                      onAllColorsChanged: (Color newColor) {
-                        ledsModel.updateLeds(Leds.all(Led.fromColor(newColor)));
-                        Navigator.of(context).pop();
-                      },
-                    ),
+                child: Center(
+                  child: MultipleCircleColorPicker(
+                    selectedColors: ledsModel.ledConfiguration!.ledValues
+                        .map((e) => e.toColor())
+                        .toList(growable: false),
+                    onColorChanged: (int index, Color newColor) {
+                      ledsModel.updateLed(index, Led.fromColor(newColor));
+                      Navigator.of(context).pop();
+                    },
+                    onAllColorsChanged: (Color newColor) {
+                      ledsModel.updateLeds(Leds.all(Led.fromColor(newColor)));
+                      Navigator.of(context).pop();
+                    },
                   ),
                 ),
               ),
