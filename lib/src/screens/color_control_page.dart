@@ -77,6 +77,7 @@ class _ColorControlPageState extends State<ColorControlPage> {
                       },
                       onAllColorsChanged: (Color newColor) {
                         ledsModel.updateLeds(Leds.all(Led.fromColor(newColor)));
+                        Navigator.of(context).pop();
                       },
                     ),
                   ),
