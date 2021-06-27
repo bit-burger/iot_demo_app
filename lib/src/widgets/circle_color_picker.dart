@@ -6,12 +6,12 @@ import 'dart:math' as math;
 class CircleColorPicker extends StatelessWidget {
   final double size;
   final Color? selectedColor;
-  final void Function(Color) onColorChange;
+  final void Function(Color)? onColorChange;
 
   CircleColorPicker({
-    this.size = 22,
-    this.selectedColor,
-    required this.onColorChange,
+    this.size = 36,
+    required this.selectedColor,
+    this.onColorChange,
   });
 
   _rotatedRedLine() => Transform.rotate(
@@ -27,25 +27,28 @@ class CircleColorPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorCircle = Container(
+      padding: EdgeInsets.zero,
+      child: SizedBox.fromSize(
+        size: Size.square(size),
+        child: selectedColor == null ? _rotatedRedLine() : null,
+      ),
+      decoration: BoxDecoration(
+        color: selectedColor,
+        border: selectedColor == null ||
+            selectedColor!.computeLuminance() > 0.95
+            ? Border.all(color: Color(0xff969696), width: 1)
+            : null,
+        borderRadius: BorderRadius.all(Radius.circular(22)),
+      ),
+    );
+    if(onColorChange == null) {
+      return colorCircle;
+    }
     return ClipOval(
       child: OPopupTrigger(
         barrierAnimationDuration: Duration(milliseconds: 400),
-        triggerWidget: Container(
-          padding: EdgeInsets.all(10.0),
-          child: SizedBox(
-            height: size,
-            width: size,
-            child: selectedColor == null ? _rotatedRedLine() : null,
-          ),
-          decoration: BoxDecoration(
-            color: selectedColor,
-            border: selectedColor == null ||
-                    selectedColor!.computeLuminance() > 0.95
-                ? Border.all(color: Color(0xff969696), width: 1)
-                : null,
-            borderRadius: BorderRadius.all(Radius.circular(22)),
-          ),
-        ),
+        triggerWidget: colorCircle,
         popupContent: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
