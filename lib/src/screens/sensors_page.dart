@@ -6,12 +6,12 @@ import 'package:iot_app/src/models/sensor_data.dart';
 import 'package:provider/provider.dart';
 
 class SensorsPage extends StatefulWidget {
-
   @override
   _SensorsPageState createState() => _SensorsPageState();
 }
 
-class _SensorsPageState extends State<SensorsPage> {
+class _SensorsPageState extends State<SensorsPage>
+    with AutomaticKeepAliveClientMixin {
   late Future<SensorData> futureSensors;
 
   @override
@@ -34,11 +34,15 @@ class _SensorsPageState extends State<SensorsPage> {
                   child: Column(
                     children: [
                       ListTile(
-                        title: Text('Temperature: ' + snapshot.data!.temperature.toString() + "°C"),
+                        title: Text('Temperature: ' +
+                            snapshot.data!.temperature.toString() +
+                            "°C"),
                       ),
                       Divider(),
                       ListTile(
-                        title: Text('Humidity: ' + snapshot.data!.humidity.toString() + "%"),
+                        title: Text('Humidity: ' +
+                            snapshot.data!.humidity.toString() +
+                            "%"),
                       ),
                     ],
                   ),
@@ -67,8 +71,7 @@ class _SensorsPageState extends State<SensorsPage> {
 
   Future<SensorData> fetchSensorState() async {
     final url = Provider.of<LedsModel>(context, listen: false).url;
-    final response =
-        await http.get(Uri.parse(url + '/sensors'));
+    final response = await http.get(Uri.parse(url + '/sensors'));
 
     if (response.statusCode == 200) {
       return SensorData.fromJson(jsonDecode(response.body));
@@ -76,4 +79,7 @@ class _SensorsPageState extends State<SensorsPage> {
       throw Exception('Failed to load sensor-data');
     }
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
