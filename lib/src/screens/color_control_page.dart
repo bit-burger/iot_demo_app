@@ -6,12 +6,12 @@ import 'package:iot_app/src/widgets/multiple_circle_color_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:iot_app/src/models/led_state.dart';
 
-class SingleColorControlPage extends StatefulWidget {
+class ColorControlPage extends StatefulWidget {
   @override
-  _SingleColorControlPageState createState() => _SingleColorControlPageState();
+  _ColorControlPageState createState() => _ColorControlPageState();
 }
 
-class _SingleColorControlPageState extends State<SingleColorControlPage> {
+class _ColorControlPageState extends State<ColorControlPage> {
   Widget _buildFrontWidget(BuildContext context, LedState ledState) {
     switch (ledState) {
       case LedState.off:
