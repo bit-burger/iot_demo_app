@@ -9,7 +9,9 @@ import 'package:implicitly_animated_reorderable_list/transitions.dart';
 import 'package:iot_app/src/models/led.dart';
 import 'package:iot_app/src/models/led_frame.dart';
 import 'package:iot_app/src/models/leds.dart';
+import 'package:iot_app/src/models/tab_view_floating_action_button_event_provider.dart';
 import 'package:iot_app/src/widgets/color_list_tile.dart';
+import 'package:provider/provider.dart';
 
 class AnimationControlPage extends StatefulWidget {
   @override
@@ -208,13 +210,6 @@ class _AnimationControlPageState extends State<AnimationControlPage>
     );
   }
 
-  @override
-  void initState() {
-    _animationFrames = <LedFrame>[];
-    _standardTime = 0.5;
-    super.initState();
-  }
-
   Widget _buildPopUpButton({required int index}) {
     return PopupMenuButton<void Function(int)>(
       padding: EdgeInsets.zero,
@@ -371,5 +366,23 @@ class _AnimationControlPageState extends State<AnimationControlPage>
   }
 
   @override
+  void initState() {
+    _animationFrames = <LedFrame>[];
+    _standardTime = 0.5;
+    Provider.of<TabViewFloatingActionButtonEventProvider>(context,
+            listen: false)
+        .addListener(_floatingActionButtonTapped);
+    super.initState();
+  }
+
+  @override
   bool get wantKeepAlive => true;
+
+  void _floatingActionButtonTapped() {
+    final provider = Provider.of<TabViewFloatingActionButtonEventProvider>(
+        context,
+        listen: false);
+    if (provider.tabIndex != 2) return;
+    print('FloatingActionButton tappped (in AnimationControlPage)');
+  }
 }

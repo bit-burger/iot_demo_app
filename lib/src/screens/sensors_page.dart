@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:iot_app/src/models/tab_view_floating_action_button_event_provider.dart';
 import 'package:iot_app/src/models/leds_model.dart';
 import 'package:iot_app/src/models/sensor_data.dart';
 import 'package:provider/provider.dart';
@@ -14,41 +15,29 @@ class _SensorsPageState extends State<SensorsPage>
     with AutomaticKeepAliveClientMixin {
   late Future<SensorData> futureSensors;
 
+  bool loading = true;
+
   @override
   void initState() {
     super.initState();
-    futureSensors = fetchSensorState();
+    futureSensors = _fetchSensorData();
+    Provider.of<TabViewFloatingActionButtonEventProvider>(context,
+            listen: false)
+        .addListener(_floatingActionButtonTapped);
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return SafeArea(
       child: Center(
         child: FutureBuilder<SensorData>(
+          initialData: null,
           future: futureSensors,
           builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return Center(
-                child: Padding(
-                  padding: EdgeInsets.all(25),
-                  child: Column(
-                    children: [
-                      ListTile(
-                        title: Text('Temperature: ' +
-                            snapshot.data!.temperature.toString() +
-                            "°C"),
-                      ),
-                      Divider(),
-                      ListTile(
-                        title: Text('Humidity: ' +
-                            snapshot.data!.humidity.toString() +
-                            "%"),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            } else if (snapshot.hasError) {
+            if (loading)
+              return CircularProgressIndicator();
+            else if (snapshot.hasError) {
               return Center(
                 child: Padding(
                   padding: EdgeInsets.all(50),
@@ -61,18 +50,50 @@ class _SensorsPageState extends State<SensorsPage>
                 ),
               );
             }
-            // By default, show a loading spinner.
-            return CircularProgressIndicator();
+            return Center(
+              child: Padding(
+                padding: EdgeInsets.all(25),
+                child: Column(
+                  children: [
+                    ListTile(
+                      title: Text('Temperature: ' +
+                          snapshot.data!.temperature.toString() +
+                          "°C"),
+                    ),
+                    Divider(),
+                    ListTile(
+                      title: Text('Humidity: ' +
+                          snapshot.data!.humidity.toString() +
+                          "%"),
+                    ),
+                  ],
+                ),
+              ),
+            );
           },
         ),
       ),
     );
   }
 
-  Future<SensorData> fetchSensorState() async {
+  void _floatingActionButtonTapped() {
+    loading = true;
+    final provider = Provider.of<TabViewFloatingActionButtonEventProvider>(
+        context,
+        listen: false);
+
+    if (provider.tabIndex == 3) {
+      setState(() {
+        futureSensors = _fetchSensorData();
+      });
+    }
+  }
+
+  Future<SensorData> _fetchSensorData() async {
     final url = Provider.of<LedsModel>(context, listen: false).url;
     final response = await http.get(Uri.parse(url + '/sensors'));
 
+    loading = false;
     if (response.statusCode == 200) {
       return SensorData.fromJson(jsonDecode(response.body));
     } else {
