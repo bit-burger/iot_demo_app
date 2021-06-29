@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import 'leds.dart';
 
 class LedFrame {
@@ -14,7 +16,7 @@ class LedFrame {
     return LedFrame(frame.copy(), time);
   }
 
-  rotateToRight() {
+  void rotateToRight() {
     final lastElement = frame.ledValues[11];
     for (var i = 10; i >= 0; i--) {
       frame.ledValues[i + 1] = frame.ledValues[i];
@@ -22,11 +24,15 @@ class LedFrame {
     frame.ledValues[0] = lastElement;
   }
 
-  rotateToLeft() {
+  void rotateToLeft() {
     final firstElement = frame.ledValues[0];
     for (var i = 1; i < 12; i++) {
       frame.ledValues[i - 1] = frame.ledValues[i];
     }
     frame.ledValues[11] = firstElement;
   }
+
+  List<Color> toColorList() => frame.ledValues
+      .map((ledValue) => ledValue.toColor())
+      .toList(growable: false);
 }

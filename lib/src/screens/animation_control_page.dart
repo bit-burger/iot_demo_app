@@ -10,6 +10,7 @@ import 'package:iot_app/src/models/led.dart';
 import 'package:iot_app/src/models/led_frame.dart';
 import 'package:iot_app/src/models/leds.dart';
 import 'package:iot_app/src/models/tab_view_floating_action_button_event_provider.dart';
+import 'package:iot_app/src/widgets/circle_color_picker_modal_sheet.dart';
 import 'package:iot_app/src/widgets/color_list_tile.dart';
 import 'package:provider/provider.dart';
 
@@ -30,14 +31,14 @@ class _AnimationControlPageState extends State<AnimationControlPage>
   void _duplicateFrameToLeft([int? i]) {
     setState(() {
       _animationFrames.insert((i ?? lastFrameIndex) + 1,
-          _animationFrames[i ?? lastFrameIndex].copy().rotateToLeft());
+          _animationFrames[i ?? lastFrameIndex].copy()..rotateToLeft());
     });
   }
 
   void _duplicateFrameToRight([int? i]) {
     setState(() {
       _animationFrames.insert((i ?? lastFrameIndex) + 1,
-          _animationFrames[i ?? lastFrameIndex].copy().rotateToRight());
+          _animationFrames[i ?? lastFrameIndex].copy()..rotateToRight());
     });
   }
 
@@ -260,19 +261,32 @@ class _AnimationControlPageState extends State<AnimationControlPage>
         final animatedBuilder = AnimatedBuilder(
           animation: dragAnimation,
           child: ColorListTile(
-            selectedColors: ledFrame.frame.ledValues
-                .map<Color>((Led e) => e.toColor())
-                .toList(growable: false),
+            onPressed: () {
+              Scaffold.of(context).showBodyScrim(true, 0.2);
+              Scaffold.of(context).showBottomSheet(
+                (context) => CircleColorPickerModalSheet(
+                  initialColorValues: ledFrame.toColorList(),
+                  dismiss: () {
+                    Navigator.of(context).pop();
+                    Scaffold.of(context).showBodyScrim(false, 0);
+                  },
+                  onChangedColors: (int? ledIndex, Color newColor) =>
+                      _changeColor(index, ledIndex, newColor),
+                ),
+                backgroundColor: Colors.transparent,
+              );
+            },
+            selectedColors: ledFrame.toColorList(),
+            onChangedColors: (int? ledIndex, Color newColor) =>
+                _changeColor(index, ledIndex, newColor),
             firstTrailing: Handle(
               child: Icon(Icons.drag_handle),
             ),
             secondTrailing: _buildPopUpButton(index: index),
-            onChangedColors: (ledIndex, newColor) =>
-                _changeColor(index, ledIndex, newColor),
           ),
           builder: (context, child) {
-            final t = dragAnimation.value;
-            final color = Color.lerp(Colors.white, Colors.grey.shade100, t);
+            final backgroundColor = Color.lerp(
+                Colors.white, Colors.grey.shade100, dragAnimation.value);
             return SizeFadeTransition(
               animation: itemAnimation,
               curve: Curves.decelerate,
@@ -287,7 +301,7 @@ class _AnimationControlPageState extends State<AnimationControlPage>
                     ),
                   Material(
                     child: child!,
-                    color: color,
+                    color: backgroundColor,
                   ),
                   if (!inDrag)
                     Divider(
