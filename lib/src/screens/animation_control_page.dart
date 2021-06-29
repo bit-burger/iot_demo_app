@@ -28,64 +28,55 @@ class _AnimationControlPageState extends State<AnimationControlPage>
 
   int get lastFrameIndex => _animationFrames.length - 1;
 
-  void _duplicateFrameToLeft([int? i]) {
-    setState(() {
+  void _duplicateFrameToLeft([int? i, int howOften = 1]) {
+    for (var j = 0; j < howOften; j++) {
       _animationFrames.insert((i ?? lastFrameIndex) + 1,
           _animationFrames[i ?? lastFrameIndex].copy()..rotateToLeft());
-    });
+    }
   }
 
-  void _duplicateFrameToRight([int? i]) {
-    setState(() {
+  void _duplicateFrameToRight([int? i, int howOften = 1]) {
+    for (var j = 0; j < howOften; j++) {
       _animationFrames.insert((i ?? lastFrameIndex) + 1,
           _animationFrames[i ?? lastFrameIndex].copy()..rotateToRight());
-    });
+    }
   }
 
-  void _duplicateFrame([int? i]) {
-    setState(() {
+  void _duplicateFrame([int? i, int howOften = 1]) {
+    for (var j = 0; j < howOften; j++) {
       _animationFrames.insert((i ?? lastFrameIndex) + 1,
           _animationFrames[i ?? lastFrameIndex].copy());
-    });
+    }
   }
 
   void _addNewFrame([int? i]) {
-    setState(() {
-      _animationFrames.insert(
-          i ?? lastFrameIndex + 1, LedFrame(Leds.off(), _standardTime));
-    });
+    _animationFrames.insert(
+        i ?? lastFrameIndex + 1, LedFrame(Leds.off(), _standardTime));
   }
 
   void _removeFrame([int? i]) {
-    setState(() {
-      _animationFrames.removeAt(i ?? lastFrameIndex);
-    });
+    _animationFrames.removeAt(i ?? lastFrameIndex);
   }
 
   void _resetFrameColors([int? i]) {
-    setState(() {
-      _animationFrames[i ?? lastFrameIndex].frame.allOff();
-    });
+    _animationFrames[i ?? lastFrameIndex].frame.allOff();
   }
 
   void _resetFrameTime([int? i]) {
-    setState(() {
-      _animationFrames[i ?? lastFrameIndex].time = _standardTime;
-    });
+    _animationFrames[i ?? lastFrameIndex].time = _standardTime;
   }
 
   void _changeColor(int i, int? ledIndex, Color newColor) {
-    setState(() {
-      final frame = _animationFrames[i];
-      final led = Led.fromColor(newColor);
-      if (ledIndex != null) {
-        frame.frame.ledValues[ledIndex] = led;
-      } else {
-        frame.frame = Leds.all(led);
-      }
-    });
+    final frame = _animationFrames[i];
+    final led = Led.fromColor(newColor);
+    if (ledIndex != null) {
+      frame.frame.ledValues[ledIndex] = led;
+    } else {
+      frame.frame = Leds.all(led);
+    }
   }
 
+  // TODO: Animate header
   Widget _buildHeader() {
     return Column(
       children: [
@@ -105,10 +96,7 @@ class _AnimationControlPageState extends State<AnimationControlPage>
                       size: 40,
                     ),
                     onPressed: () {
-                      setState(() {
-                        _animationFrames
-                            .add(LedFrame(Leds.off(), _standardTime));
-                      });
+                      setState(_addNewFrame);
                     },
                   ),
                   SizedBox(
@@ -155,23 +143,34 @@ class _AnimationControlPageState extends State<AnimationControlPage>
             children: [
               TextButton(
                 child: Text('Add new'),
-                onPressed: _addNewFrame,
+                onPressed: () => setState(_addNewFrame),
               ),
               TextButton(
                 child: Text('Delete last'),
-                onPressed: noFrames ? null : _removeFrame,
+                onPressed: noFrames ? null : () => setState(_removeFrame),
               ),
               TextButton(
                 child: Text('Duplicate last'),
-                onPressed: noFrames ? null : _duplicateFrame,
+                onPressed: noFrames ? null : () => setState(_duplicateFrame),
+                onLongPress: noFrames
+                    ? null
+                    : () => setState(() => _duplicateFrame(null, 11)),
               ),
               TextButton(
                 child: Text('Duplicate last left'),
-                onPressed: noFrames ? null : _duplicateFrameToLeft,
+                onPressed:
+                    noFrames ? null : () => setState(_duplicateFrameToLeft),
+                onLongPress: noFrames
+                    ? null
+                    : () => setState(() => _duplicateFrameToLeft(null, 11)),
               ),
               TextButton(
                 child: Text('Duplicate last right'),
-                onPressed: noFrames ? null : _duplicateFrameToRight,
+                onPressed:
+                    noFrames ? null : () => setState(_duplicateFrameToRight),
+                onLongPress: noFrames
+                    ? null
+                    : () => setState(() => _duplicateFrameToRight(null, 11)),
               ),
             ],
           ),
@@ -206,6 +205,9 @@ class _AnimationControlPageState extends State<AnimationControlPage>
               });
             },
           ),
+          SizedBox(
+            height: MediaQuery.of(context).padding.bottom + 200,
+          ),
         ],
       ),
     );
@@ -220,29 +222,29 @@ class _AnimationControlPageState extends State<AnimationControlPage>
       },
       itemBuilder: (_) => <PopupMenuEntry<void Function(int)>>[
         PopupMenuItem(
-          value: _duplicateFrame,
+          value: (i) => setState(() => _duplicateFrame(i)),
           child: Text('Duplicate'),
         ),
         PopupMenuItem(
-          value: _duplicateFrameToLeft,
+          value: (i) => setState(() => _duplicateFrameToLeft(i)),
           child: Text('Duplicate to left'),
         ),
         PopupMenuItem(
-          value: _duplicateFrameToRight,
+          value: (i) => setState(() => _duplicateFrameToRight(i)),
           child: Text('Duplicate to right'),
         ),
         PopupMenuDivider(),
         PopupMenuItem(
-          value: _resetFrameColors,
+          value: (i) => setState(() => _resetFrameColors(i)),
           child: Text('Reset colors'),
         ),
         PopupMenuItem(
-          value: _resetFrameTime,
+          value: (i) => setState(() => _resetFrameTime(i)),
           child: Text('Reset frame time'),
         ),
         PopupMenuDivider(),
         PopupMenuItem(
-          value: _removeFrame,
+          value: (i) => setState(() => _removeFrame(i)),
           child: Text('Delete'),
         ),
       ],
@@ -271,14 +273,14 @@ class _AnimationControlPageState extends State<AnimationControlPage>
                     Scaffold.of(context).showBodyScrim(false, 0);
                   },
                   onChangedColors: (int? ledIndex, Color newColor) =>
-                      _changeColor(index, ledIndex, newColor),
+                      setState(() => _changeColor(index, ledIndex, newColor)),
                 ),
                 backgroundColor: Colors.transparent,
               );
             },
             selectedColors: ledFrame.toColorList(),
             onChangedColors: (int? ledIndex, Color newColor) =>
-                _changeColor(index, ledIndex, newColor),
+                setState(() => _changeColor(index, ledIndex, newColor)),
             firstTrailing: Handle(
               child: Icon(Icons.drag_handle),
             ),
@@ -321,9 +323,7 @@ class _AnimationControlPageState extends State<AnimationControlPage>
           actions: [
             SlideAction(
               onTap: () {
-                setState(() {
-                  _duplicateFrame(index);
-                });
+                setState(() => _duplicateFrame(index));
               },
               color: Colors.blueAccent,
               child: Center(
@@ -337,9 +337,7 @@ class _AnimationControlPageState extends State<AnimationControlPage>
           secondaryActions: [
             SlideAction(
               onTap: () {
-                setState(() {
-                  _removeFrame(index);
-                });
+                setState(() => _removeFrame(index));
               },
               color: Colors.redAccent,
               child: Center(
