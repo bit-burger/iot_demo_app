@@ -49,9 +49,11 @@ class _AnimationControlPageState extends State<AnimationControlPage>
     }
   }
 
-  void _addNewFrame([int? i]) {
-    _animationFrames.insert(
-        i ?? lastFrameIndex + 1, LedFrame(Leds.off(), _standardTime));
+  void _addNewFrame([int? i, int howOften = 1]) {
+    for (var j = 0; j < howOften; j++) {
+      _animationFrames.insert(
+          i ?? lastFrameIndex + 1, LedFrame(Leds.off(), _standardTime));
+    }
   }
 
   void _removeFrame([int? i]) {
@@ -144,6 +146,7 @@ class _AnimationControlPageState extends State<AnimationControlPage>
               TextButton(
                 child: Text('Add new'),
                 onPressed: () => setState(_addNewFrame),
+                onLongPress: () => setState(() => _addNewFrame(null, 11)),
               ),
               TextButton(
                 child: Text('Delete last'),
