@@ -15,24 +15,29 @@ class _ColorControlPageState extends State<ColorControlPage> {
   Widget _buildFrontWidget(BuildContext context, LedState ledState) {
     switch (ledState) {
       case LedState.off:
-        return Align(
-          alignment: Alignment.bottomCenter,
-          child: TextButton(
-            style: ButtonStyle(
-              backgroundColor:
-                  MaterialStateProperty.all(Theme.of(context).primaryColor),
-            ),
-            onPressed: () {
-              Provider.of<LedRing>(context, listen: false).turnOn();
-            },
-            child: Text(
-              'Turn back on',
-              style: Theme.of(context).primaryTextTheme.button,
+        return SafeArea(
+          child: Padding(
+            padding: EdgeInsets.only(bottom: 15),
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: TextButton(
+                style: ButtonStyle(
+                  backgroundColor:
+                      MaterialStateProperty.all(Theme.of(context).primaryColor),
+                ),
+                onPressed: () {
+                  Provider.of<LedRing>(context, listen: false).turnOn();
+                },
+                child: Text(
+                  'Turn back on',
+                  style: Theme.of(context).primaryTextTheme.button,
+                ),
+              ),
             ),
           ),
         );
       case LedState.loading:
-        return CircularProgressIndicator();
+        return Center(child: CircularProgressIndicator());
       case LedState.error:
         return SafeArea(
           child: Padding(
