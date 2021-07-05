@@ -10,6 +10,7 @@ import 'package:iot_app/src/models/led.dart';
 import 'package:iot_app/src/models/led_frame.dart';
 import 'package:iot_app/src/models/leds.dart';
 import 'package:iot_app/src/providers/floating_action_button_events.dart';
+import 'package:iot_app/src/providers/micro_controller.dart';
 import 'package:iot_app/src/providers/preferences.dart';
 import 'package:iot_app/src/providers/tab_view_index.dart';
 import 'package:iot_app/src/widgets/circle_color_picker_modal_sheet.dart';
@@ -20,11 +21,21 @@ class AnimationControlPage extends StatefulWidget {
   @override
   _AnimationControlPageState createState() => _AnimationControlPageState();
 }
+// TODO: make sure errors and animation is handled accordingly:
+//       - if any command on normal is done (like turning off and on),
+//       - an error should be returned by the api and be showed
+//       - that is why also the error message must be recorded and displayed
+//       - if animation is already running and new one is put on top it should be overridden
+//       - animation stop button must exist (maybe long press on FAB)
+//       - if any other error happens on animation, it should be displayed with a snack bar
 
 class _AnimationControlPageState extends State<AnimationControlPage>
     with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
   late final List<LedFrame> _animationFrames;
+
+  // TODO: have these two values also saved in Preferences
   late double _standardTime;
+  late int _repeat;
 
   bool get noFrames => _animationFrames.length == 0;
 
@@ -234,6 +245,37 @@ class _AnimationControlPageState extends State<AnimationControlPage>
               });
             },
           ),
+          Divider(),
+          SizedBox(
+            height: 20,
+          ),
+          Padding(
+            padding: EdgeInsets.only(left: 5),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(() {
+                var timeAsString = _repeat.toString();
+                if (_repeat < 10) timeAsString = ' ' + timeAsString;
+                if (_repeat < 100) timeAsString = timeAsString + '';
+                return 'How often to repeat the sequence: ' +
+                    timeAsString +
+                    ' time' +
+                    (_repeat == 1 ? '' : 's');
+              }()),
+            ),
+          ),
+          Slider.adaptive(
+            min: 1,
+            max: 100,
+            value: _repeat.toDouble(),
+            label: _repeat.toString(),
+            onChanged: (v) {
+              HapticFeedback.selectionClick();
+              setState(() {
+                _repeat = v.toInt();
+              });
+            },
+          ),
           SizedBox(
             height: MediaQuery.of(context).padding.bottom + 200,
           ),
@@ -410,6 +452,7 @@ class _AnimationControlPageState extends State<AnimationControlPage>
   void initState() {
     _animationFrames = context.read<Preferences>().ledAnimationFrames;
     _standardTime = 0.5;
+    _repeat = 100;
 
     context
         .read<FloatingActionButtonEvents>()
@@ -428,8 +471,14 @@ class _AnimationControlPageState extends State<AnimationControlPage>
   bool get wantKeepAlive => true;
 
   void _floatingActionButtonTapped() {
-    final provider = context.read<TabViewIndex>();
-    if (provider.index != 2) return;
-    print('FloatingActionButton tappped (in AnimationControlPage)');
+    final tabIndex = context.read<TabViewIndex>();
+    if (tabIndex.index != 2) return;
+    final microController = context.read<MicroController>();
+    microController.makeRequest('/animation', Method.PUT, {
+      'repeat': _repeat,
+      'frames': _animationFrames
+          .map((frame) => frame.toJson())
+          .toList(growable: false),
+    });
   }
 }

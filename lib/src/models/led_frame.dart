@@ -33,7 +33,7 @@ class LedFrame {
 
   Map<String, dynamic> toJson() {
     return {
-      "frame": frame,
+      "frame": frame.toJson(),
       "time": time,
     };
   }
