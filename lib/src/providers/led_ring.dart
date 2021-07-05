@@ -44,7 +44,6 @@ class LedRing extends ChangeNotifier {
     }
   }
 
-
   void turnOn() async {
     assert(!isOn);
     _updateLeds(() =>
@@ -65,13 +64,15 @@ class LedRing extends ChangeNotifier {
 
   void updateLeds(Leds newLeds) {
     assert(isOn);
-    _updateLeds(() => _setLeds(newLeds), forceOverrideConfiguration: true);
+    _updateLeds(
+      () => _setLeds(newLeds),
+      forceOverrideConfiguration: true,
+    );
   }
 
   void refresh() async {
     _updateLeds(
       () => _getLeds(),
-      forceOverrideConfiguration: true,
     );
   }
 
