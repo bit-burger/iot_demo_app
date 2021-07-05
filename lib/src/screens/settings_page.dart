@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:iot_app/src/models/leds_model.dart';
+import 'package:iot_app/src/models/led_state.dart';
+import 'package:iot_app/src/providers/led_ring.dart';
+import 'package:iot_app/src/providers/preferences.dart';
 import 'package:provider/provider.dart';
 import 'package:iot_app/constants.dart' show urlRegex;
 
@@ -13,46 +15,74 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsState extends State<SettingsPage> {
   // of the TextField.
-  late final TextEditingController textController;
+  late final TextEditingController _textController;
+  late final FocusNode _focusNode;
 
   @override
   void initState() {
-    textController = TextEditingController(
-      text: Provider.of<LedsModel>(context, listen: false).url,
+    _textController = TextEditingController(
+      text: context.read<Preferences>().url,
     );
+    _focusNode = FocusNode();
     super.initState();
   }
 
   @override
   void dispose() {
-    textController.dispose();
+    _textController.dispose();
     super.dispose();
   }
 
   saveNewSettings([String? url]) {
-    if (url == null) url = textController.text;
-    if (url.isEmpty ||
-        !urlRegex.hasMatch(url)) {
+    if (url == null) {
+      _focusNode.unfocus();
+      url = _textController.text;
+    }
+    if (url.isEmpty || !urlRegex.hasMatch(url)) {
       setState(() {});
     } else {
-      Provider.of<LedsModel>(context, listen: false).changeUrl(url);
+      setState(() {
+        context.read<Preferences>().url = url!;
+      });
+      context.read<LedRing>().refresh();
       showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
-            // Retrieve the text the that user has entered by using the
-            // TextEditingController.
             title: Text(
               "Saved: " + url!,
               style: Theme.of(context).textTheme.headline6,
             ),
             content: Text(
-              "To view the changes, "
-              "press on the refresh button",
+              "The app will now fetch the new data from the new destination",
             ),
           );
         },
       );
+    }
+  }
+
+  Widget _buildConnectionStatus(LedState ledState) {
+    switch (ledState) {
+      case LedState.loading:
+        return CircularProgressIndicator();
+      default:
+        return Text.rich(
+          TextSpan(
+            text: 'Connection Status: ',
+            children: [
+              TextSpan(
+                text: ledState != LedState.error ? 'Connected' : 'Errored',
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          style: TextStyle(
+            color: ledState != LedState.error ? Colors.blueAccent : Colors.red,
+          ),
+        );
     }
   }
 
@@ -64,13 +94,14 @@ class _SettingsState extends State<SettingsPage> {
         child: Column(
           children: [
             TextField(
-              textInputAction: TextInputAction.done,
-              controller: textController,
+              focusNode: _focusNode,
+              controller: _textController,
               onSubmitted: saveNewSettings,
+              textInputAction: TextInputAction.done,
               decoration: InputDecoration(
-                errorText: textController.text.isEmpty
+                errorText: _textController.text.isEmpty
                     ? 'Please enter a url'
-                    : !urlRegex.hasMatch(textController.text)
+                    : !urlRegex.hasMatch(_textController.text)
                         ? 'Not a valid url'
                         : null,
                 hintText: 'http://url-for-microcontroller',
@@ -81,7 +112,18 @@ class _SettingsState extends State<SettingsPage> {
               // When the user presses the button, show an alert dialog containing
               // the text that the user has entered into the text field.
               onPressed: saveNewSettings,
-              child: Text('Save settings'),
+              child: Text(
+                'Save settings',
+                style: Theme.of(context).primaryTextTheme.button,
+              ),
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(Colors.blue),
+              ),
+            ),
+            SizedBox(height: 20),
+            Consumer<LedRing>(
+              builder: (_, ledRing, __) =>
+                  _buildConnectionStatus(ledRing.ledState),
             ),
           ],
         ),

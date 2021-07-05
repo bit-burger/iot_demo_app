@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'leds.dart';
 
 class LedFrame {
@@ -8,12 +7,8 @@ class LedFrame {
 
   LedFrame(this.frame, this.time);
 
-  String toJson() {
-    return '{"frame": $frame, "time": $time}';
-  }
-
-  LedFrame copy() {
-    return LedFrame(frame.copy(), time);
+  factory LedFrame.fromJson(Map<String, dynamic> json) {
+    return LedFrame(Leds.fromJson(json['frame']), json['time']);
   }
 
   void rotateToRight() {
@@ -35,4 +30,15 @@ class LedFrame {
   List<Color> toColorList() => frame.ledValues
       .map((ledValue) => ledValue.toColor())
       .toList(growable: false);
+
+  Map<String, dynamic> toJson() {
+    return {
+      "frame": frame,
+      "time": time,
+    };
+  }
+
+  LedFrame copy() {
+    return LedFrame(frame.copy(), time);
+  }
 }

@@ -1,14 +1,14 @@
 import 'package:flutter/widgets.dart';
-import 'package:http/http.dart' as http;
+import 'package:iot_app/src/providers/micro_controller.dart';
+import 'package:iot_app/src/providers/preferences.dart';
 
-import 'led.dart';
-import 'leds.dart';
-import 'led_state.dart';
+import '../models/led.dart';
+import '../models/leds.dart';
+import '../models/led_state.dart';
 
-import 'dart:convert' as convert;
-
-class LedsModel extends ChangeNotifier {
-  LedsModel(this._url) {
+class LedRing extends ChangeNotifier {
+  LedRing(this._preferences, this._microController)
+      : this._ledConfiguration = _preferences.ledColors {
     _updateLeds(
       () => _getLeds(),
       forceOverrideConfiguration: true,
@@ -16,19 +16,22 @@ class LedsModel extends ChangeNotifier {
     );
   }
 
-  late String _url;
+  Preferences _preferences;
+  MicroController _microController;
 
   LedState _ledState = LedState.loading;
+  Leds _ledConfiguration;
 
-  Leds? _ledConfiguration;
-
-  Leds? get ledConfiguration => _ledConfiguration;
-
-  String get url => _url;
+  Leds get ledConfiguration => _ledConfiguration;
 
   LedState get ledState => _ledState;
 
   bool get isActive => _ledState == LedState.on || _ledState == LedState.off;
+
+  void _setLedConfiguration(Leds newConfiguration) {
+    this._ledConfiguration = newConfiguration;
+    _preferences.ledColors = newConfiguration;
+  }
 
   bool get isOn {
     switch (_ledState) {
@@ -41,17 +44,11 @@ class LedsModel extends ChangeNotifier {
     }
   }
 
-  void changeUrl(String newUrl) {
-    _url = newUrl;
-    nL();
-  }
 
-  // if config is completely off make config full on
-  // after that just use config to update
   void turnOn() async {
     assert(!isOn);
-    if (_ledConfiguration!.isOff) _ledConfiguration = Leds.on();
-    _updateLeds(() => _setLeds(_ledConfiguration!));
+    _updateLeds(() =>
+        _setLeds(_ledConfiguration.isOff ? Leds.on() : _ledConfiguration));
   }
 
   void turnOff() async {
@@ -61,7 +58,7 @@ class LedsModel extends ChangeNotifier {
 
   void updateLed(int replacingLedPosition, Led replacingLed) {
     assert(isActive);
-    final ledCopy = _ledConfiguration!.copy();
+    final ledCopy = _ledConfiguration.copy();
     ledCopy.ledValues[replacingLedPosition] = replacingLed;
     _updateLeds(() => _setLeds(ledCopy));
   }
@@ -71,14 +68,14 @@ class LedsModel extends ChangeNotifier {
     _updateLeds(() => _setLeds(newLeds), forceOverrideConfiguration: true);
   }
 
-  void refreshData() async {
+  void refresh() async {
     _updateLeds(
       () => _getLeds(),
       forceOverrideConfiguration: true,
     );
   }
 
-  void resetLeds() async {
+  void reset() async {
     _updateLeds(
       () async => _setLeds(Leds.off()),
       forceOverrideConfiguration: true,
@@ -98,9 +95,9 @@ class LedsModel extends ChangeNotifier {
       final leds = await updatingTask();
       if (!leds.isCompletelyOnOrOff) {
         _ledState = LedState.on;
-        _ledConfiguration = leds;
+        _setLedConfiguration(leds);
       } else {
-        if (forceOverrideConfiguration) _ledConfiguration = leds;
+        if (forceOverrideConfiguration) _setLedConfiguration(leds);
         _ledState = leds.isOff ? LedState.off : LedState.on;
       }
     } on Exception {
@@ -110,29 +107,18 @@ class LedsModel extends ChangeNotifier {
   }
 
   Future<Leds> _getLeds() async {
-    final response = await http.get(Uri.parse(_url + '/leds'));
-    return _processResponse(response);
+    final result = await _microController.makeRequest('/leds');
+    if (result.isError) throw Exception(result.asError!.error);
+    final json = result.asValue!.value!;
+    return Leds.fromJson(json);
   }
 
   Future<Leds> _setLeds(Leds leds) async {
-    print('Client: ' + leds.toJson());
-    final response = await http.put(
-      Uri.parse(_url + '/leds'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: leds.toJson(),
-    );
-    return _processResponse(response);
-  }
-
-  Leds _processResponse(http.Response response) {
-    if (response.statusCode == 200) {
-      final leds = Leds.fromJSON(convert.jsonDecode(response.body));
-      print('Micro: ' + leds.toJson());
-      return leds;
-    }
-    throw Exception();
+    final result =
+        await _microController.makeRequest('/leds', Method.PUT, leds);
+    if (result.isError) throw Exception(result.asError!.error);
+    final json = result.asValue!.value!;
+    return Leds.fromJson(json);
   }
 
   void nL() {

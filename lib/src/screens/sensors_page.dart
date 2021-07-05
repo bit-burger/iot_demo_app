@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:iot_app/src/models/tab_view_floating_action_button_event_provider.dart';
-import 'package:iot_app/src/models/leds_model.dart';
-import 'package:iot_app/src/models/sensor_data.dart';
+import 'package:iot_app/src/models/sensor_state.dart';
+import 'package:iot_app/src/providers/floating_action_button_events.dart';
+import 'package:iot_app/src/providers/tab_view_index.dart';
+import 'package:iot_app/src/providers/sensors.dart';
 import 'package:provider/provider.dart';
 
 class SensorsPage extends StatefulWidget {
@@ -13,17 +12,45 @@ class SensorsPage extends StatefulWidget {
 
 class _SensorsPageState extends State<SensorsPage>
     with AutomaticKeepAliveClientMixin {
-  late Future<SensorData> futureSensors;
-
-  bool loading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    futureSensors = _fetchSensorData();
-    Provider.of<TabViewFloatingActionButtonEventProvider>(context,
-            listen: false)
-        .addListener(_floatingActionButtonTapped);
+  Widget _buildInformationArea() {
+    final sensors = Provider.of<Sensors>(context);
+    switch (sensors.sensorState) {
+      case SensorState.value:
+        return Center(
+          child: Padding(
+            padding: EdgeInsets.all(25),
+            child: Column(
+              children: [
+                ListTile(
+                  title: Text('Temperature: ' +
+                      sensors.sensorData.temperature.toString() +
+                      "°C"),
+                ),
+                Divider(),
+                ListTile(
+                  title: Text('Humidity: ' +
+                      sensors.sensorData.humidity.toString() +
+                      "%"),
+                ),
+              ],
+            ),
+          ),
+        );
+      case SensorState.loading:
+        return CircularProgressIndicator();
+      case SensorState.error:
+        return Center(
+          child: Padding(
+            padding: EdgeInsets.all(50),
+            child: Text(
+              'Something went wrong, '
+              'make sure your sensors are connected, '
+              'and your board is connected to your local wlan',
+              textAlign: TextAlign.center,
+            ),
+          ),
+        );
+    }
   }
 
   @override
@@ -31,74 +58,25 @@ class _SensorsPageState extends State<SensorsPage>
     super.build(context);
     return SafeArea(
       child: Center(
-        child: FutureBuilder<SensorData>(
-          initialData: null,
-          future: futureSensors,
-          builder: (context, snapshot) {
-            if (loading)
-              return CircularProgressIndicator();
-            else if (snapshot.hasError) {
-              return Center(
-                child: Padding(
-                  padding: EdgeInsets.all(50),
-                  child: Text(
-                    'Something went wrong, '
-                    'make sure your sensors are connected, '
-                    'and your board is connected to your local wlan',
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              );
-            }
-            return Center(
-              child: Padding(
-                padding: EdgeInsets.all(25),
-                child: Column(
-                  children: [
-                    ListTile(
-                      title: Text('Temperature: ' +
-                          snapshot.data!.temperature.toString() +
-                          "°C"),
-                    ),
-                    Divider(),
-                    ListTile(
-                      title: Text('Humidity: ' +
-                          snapshot.data!.humidity.toString() +
-                          "%"),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
+        child: _buildInformationArea(),
       ),
     );
   }
 
   void _floatingActionButtonTapped() {
-    loading = true;
-    final provider = Provider.of<TabViewFloatingActionButtonEventProvider>(
-        context,
-        listen: false);
+    final provider = context.read<TabViewIndex>();
 
-    if (provider.tabIndex == 3) {
-      setState(() {
-        futureSensors = _fetchSensorData();
-      });
+    if (provider.index == 3) {
+      context.read<Sensors>().refresh();
     }
   }
 
-  Future<SensorData> _fetchSensorData() async {
-    final url = Provider.of<LedsModel>(context, listen: false).url;
-    final response = await http.get(Uri.parse(url + '/sensors'));
-
-    loading = false;
-    if (response.statusCode == 200) {
-      return SensorData.fromJson(jsonDecode(response.body));
-    } else {
-      throw Exception('Failed to load sensor-data');
-    }
+  @override
+  void initState() {
+    super.initState();
+    context
+        .read<FloatingActionButtonEvents>()
+        .addListener(_floatingActionButtonTapped);
   }
 
   @override

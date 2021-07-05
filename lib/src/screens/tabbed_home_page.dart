@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:iot_app/src/models/tab_view_floating_action_button_event_provider.dart';
-import 'package:iot_app/src/models/leds_model.dart';
+import 'package:iot_app/src/providers/floating_action_button_events.dart';
+import 'package:iot_app/src/providers/tab_view_index.dart';
+import 'package:iot_app/src/providers/led_ring.dart';
 import 'package:iot_app/src/screens/animation_control_page.dart';
 import 'package:provider/provider.dart';
 import 'color_control_page.dart';
@@ -9,9 +10,7 @@ import 'settings_page.dart';
 import 'led_control_page.dart';
 
 class TabbedHomePage extends StatefulWidget {
-  TabbedHomePage({required this.initialIndex});
-
-  final int initialIndex;
+  TabbedHomePage();
 
   @override
   _TabbedHomePageState createState() => _TabbedHomePageState();
@@ -20,7 +19,6 @@ class TabbedHomePage extends StatefulWidget {
 class _TabbedHomePageState extends State<TabbedHomePage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  late int _tabIndex;
 
   static const List<IconData?> tabIconList = [
     null,
@@ -32,7 +30,8 @@ class _TabbedHomePageState extends State<TabbedHomePage>
 
   @override
   Widget build(BuildContext context) {
-    final currentTabIcon = tabIconList[_tabIndex];
+    final tabIndex = context.watch<TabViewIndex>().index;
+    final currentTabIcon = tabIconList[tabIndex];
     return Scaffold(
       appBar: AppBar(
         leading: SizedBox(),
@@ -67,17 +66,17 @@ class _TabbedHomePageState extends State<TabbedHomePage>
         onLongPress: currentTabIcon != null
             ? null
             : () {
-                Provider.of<LedsModel>(context, listen: false).resetLeds();
+          Provider.of<LedRing>(context, listen: false).reset();
               },
         child: FloatingActionButton(
           onPressed: currentTabIcon != null
               ? () {
-                  Provider.of<TabViewFloatingActionButtonEventProvider>(context,
-                          listen: false)
-                      .floatingActionButtonTapped();
+                  context
+                      .read<FloatingActionButtonEvents>()
+                      .floatingActionButtonPressed();
                 }
               : () {
-                  Provider.of<LedsModel>(context, listen: false).refreshData();
+            context.read<LedRing>().refresh();
                 },
           child: Icon(
             currentTabIcon ?? Icons.refresh,
@@ -92,18 +91,10 @@ class _TabbedHomePageState extends State<TabbedHomePage>
     _tabController = TabController(
       length: 5,
       vsync: this,
-      initialIndex: widget.initialIndex,
+      initialIndex: context.read<TabViewIndex>().index,
     );
-    _tabIndex = widget.initialIndex;
     _tabController.addListener(() {
-      if (_tabIndex != _tabController.index) {
-        setState(() {
-          _tabIndex = _tabController.index;
-          Provider.of<TabViewFloatingActionButtonEventProvider>(context,
-                  listen: false)
-              .tabChanged(_tabIndex);
-        });
-      }
+      context.read<TabViewIndex>().index = _tabController.index;
     });
     super.initState();
   }

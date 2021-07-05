@@ -9,7 +9,9 @@ import 'package:implicitly_animated_reorderable_list/transitions.dart';
 import 'package:iot_app/src/models/led.dart';
 import 'package:iot_app/src/models/led_frame.dart';
 import 'package:iot_app/src/models/leds.dart';
-import 'package:iot_app/src/models/tab_view_floating_action_button_event_provider.dart';
+import 'package:iot_app/src/providers/floating_action_button_events.dart';
+import 'package:iot_app/src/providers/preferences.dart';
+import 'package:iot_app/src/providers/tab_view_index.dart';
 import 'package:iot_app/src/widgets/circle_color_picker_modal_sheet.dart';
 import 'package:iot_app/src/widgets/color_list_tile.dart';
 import 'package:provider/provider.dart';
@@ -28,11 +30,16 @@ class _AnimationControlPageState extends State<AnimationControlPage>
 
   int get lastFrameIndex => _animationFrames.length - 1;
 
+  void saveChanges() {
+    context.read<Preferences>().ledAnimationFrames = _animationFrames;
+  }
+
   void _duplicateFrameToLeft([int? i, int howOften = 1]) {
     for (var j = 0; j < howOften; j++) {
       _animationFrames.insert((i ?? lastFrameIndex) + 1,
           _animationFrames[i ?? lastFrameIndex].copy()..rotateToLeft());
     }
+    saveChanges();
   }
 
   void _duplicateFrameToRight([int? i, int howOften = 1]) {
@@ -40,6 +47,7 @@ class _AnimationControlPageState extends State<AnimationControlPage>
       _animationFrames.insert((i ?? lastFrameIndex) + 1,
           _animationFrames[i ?? lastFrameIndex].copy()..rotateToRight());
     }
+    saveChanges();
   }
 
   void _duplicateFrame([int? i, int howOften = 1]) {
@@ -47,6 +55,7 @@ class _AnimationControlPageState extends State<AnimationControlPage>
       _animationFrames.insert((i ?? lastFrameIndex) + 1,
           _animationFrames[i ?? lastFrameIndex].copy());
     }
+    saveChanges();
   }
 
   void _addNewFrame([int? i, int howOften = 1]) {
@@ -54,18 +63,22 @@ class _AnimationControlPageState extends State<AnimationControlPage>
       _animationFrames.insert(
           i ?? lastFrameIndex + 1, LedFrame(Leds.off(), _standardTime));
     }
+    saveChanges();
   }
 
   void _removeFrame([int? i]) {
     _animationFrames.removeAt(i ?? lastFrameIndex);
+    saveChanges();
   }
 
   void _resetFrameColors([int? i]) {
     _animationFrames[i ?? lastFrameIndex].frame.allOff();
+    saveChanges();
   }
 
   void _resetFrameTime([int? i]) {
     _animationFrames[i ?? lastFrameIndex].time = _standardTime;
+    saveChanges();
   }
 
   void _changeColor(int i, int? ledIndex, Color newColor) {
@@ -76,6 +89,7 @@ class _AnimationControlPageState extends State<AnimationControlPage>
     } else {
       frame.frame = Leds.all(led);
     }
+    saveChanges();
   }
 
   // TODO: Animate header
@@ -382,11 +396,14 @@ class _AnimationControlPageState extends State<AnimationControlPage>
 
   @override
   void initState() {
-    _animationFrames = <LedFrame>[];
+    _animationFrames = context.read<Preferences>().ledAnimationFrames;
+    print(context.read<Preferences>().ledAnimationFrames);
     _standardTime = 0.5;
-    Provider.of<TabViewFloatingActionButtonEventProvider>(context,
-            listen: false)
+
+    context
+        .read<FloatingActionButtonEvents>()
         .addListener(_floatingActionButtonTapped);
+
     super.initState();
   }
 
@@ -394,10 +411,8 @@ class _AnimationControlPageState extends State<AnimationControlPage>
   bool get wantKeepAlive => true;
 
   void _floatingActionButtonTapped() {
-    final provider = Provider.of<TabViewFloatingActionButtonEventProvider>(
-        context,
-        listen: false);
-    if (provider.tabIndex != 2) return;
+    final provider = context.read<TabViewIndex>();
+    if (provider.index != 2) return;
     print('FloatingActionButton tappped (in AnimationControlPage)');
   }
 }

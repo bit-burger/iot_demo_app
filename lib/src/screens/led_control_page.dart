@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:iot_app/src/models/leds_model.dart';
+import 'package:iot_app/src/providers/led_ring.dart';
 import 'package:provider/provider.dart';
 import 'package:iot_app/src/models/led_state.dart';
 
@@ -16,7 +16,7 @@ class _LedControlPageState extends State<LedControlPage> {
         return Switch.adaptive(
           value: ledState == LedState.on,
           onChanged: (v) {
-            final ledsModel = Provider.of<LedsModel>(context, listen: false);
+            final ledsModel = Provider.of<LedRing>(context, listen: false);
             if (v) {
               return ledsModel.turnOn();
             }
@@ -32,7 +32,7 @@ class _LedControlPageState extends State<LedControlPage> {
                 MaterialStateProperty.all(Theme.of(context).errorColor),
           ),
           onPressed: () {
-            Provider.of<LedsModel>(context, listen: false).refreshData();
+            Provider.of<LedRing>(context, listen: false).refresh();
           },
           child: Text(
             'Retry',
@@ -48,7 +48,7 @@ class _LedControlPageState extends State<LedControlPage> {
       child: Center(
         child: Padding(
           padding: EdgeInsets.all(60),
-          child: Consumer<LedsModel>(
+          child: Consumer<LedRing>(
             builder: (context, ledsModel, _) {
               final state = ledsModel.ledState;
               return Column(

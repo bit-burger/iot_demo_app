@@ -2,10 +2,11 @@ import 'led.dart';
 
 class Leds {
   final List<Led> ledValues;
+
   Leds({required this.ledValues});
 
-  factory Leds.fromJSON(List<dynamic> json) {
-    return Leds(ledValues: json.map((e) => Led.formJSON(e)).toList());
+  factory Leds.fromJson(List<dynamic> json) {
+    return Leds(ledValues: json.map((e) => Led.fromJson(e)).toList());
   }
 
   factory Leds.on() {
@@ -62,14 +63,8 @@ class Leds {
     });
   }
 
-  String toJson() {
-    String json = "[";
-    for (int i = 0; i < this.ledValues.length; i++) {
-      json = json + this.ledValues[i].toJson();
-      if (i < this.ledValues.length - 1) json = json + ",";
-    }
-    json = json + "]";
-    return json;
+  List<List<int>> toJson() {
+    return ledValues.map((led) => led.toJson()).toList(growable: false);
   }
 
   Leds copy() {

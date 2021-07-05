@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 
 class Led {
@@ -18,7 +16,7 @@ class Led {
     return Led(rgbValues: [color.red, color.green, color.blue]);
   }
 
-  factory Led.formJSON(List<dynamic> json) {
+  factory Led.fromJson(List<dynamic> json) {
     return Led(rgbValues: json.map((e) => e as int).toList());
   }
   setRGB(int r, int g, int b) {
@@ -38,8 +36,8 @@ class Led {
     return Color.fromARGB(255, rgbValues[0], rgbValues[1], rgbValues[2]);
   }
 
-  String toJson() {
-    return jsonEncode(rgbValues);
+  List<int> toJson() {
+    return rgbValues;
   }
 
   Led copy() {

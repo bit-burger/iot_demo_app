@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:iot_app/src/models/tab_view_floating_action_button_event_provider.dart';
-import 'package:iot_app/src/models/leds_model.dart';
+import 'package:iot_app/src/providers/floating_action_button_events.dart';
+import 'package:iot_app/src/providers/tab_view_index.dart';
+import 'package:iot_app/src/providers/led_ring.dart';
+import 'package:iot_app/src/providers/micro_controller.dart';
+import 'package:iot_app/src/providers/preferences.dart';
+import 'package:iot_app/src/providers/sensors.dart';
 import 'package:iot_app/src/screens/tabbed_home_page.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import 'constants.dart';
-
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  Provider.debugCheckInvalidValueType = null;
+  Preferences.sharedPreferences = await SharedPreferences.getInstance();
   runApp(MyApp());
 }
 
@@ -16,22 +22,37 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider<TabViewFloatingActionButtonEventProvider>(
-          create: (BuildContext context) =>
-              TabViewFloatingActionButtonEventProvider(initialTabIndex),
+        Provider<Preferences>(
+          create: (BuildContext context) => Preferences(),
         ),
-        ChangeNotifierProvider<LedsModel>(
-          create: (BuildContext context) {
-            return LedsModel(defaultUrl);
-          },
+        Provider<FloatingActionButtonEvents>(
+          create: (BuildContext context) => FloatingActionButtonEvents(),
+        ),
+        ChangeNotifierProxyProvider<Preferences, TabViewIndex>(
+          create: (BuildContext context) =>
+              TabViewIndex(context.read<Preferences>()),
+          update: (_, __, homePageEvents) => homePageEvents!,
+        ),
+        ProxyProvider<Preferences, MicroController>(
+          create: (BuildContext context) =>
+              MicroController(context.read<Preferences>()),
+          update: (_, __, microController) => microController!,
+        ),
+        ChangeNotifierProxyProvider<MicroController, Sensors>(
+          create: (BuildContext context) =>
+              Sensors(context.read<MicroController>()),
+          update: (_, __, sensors) => sensors!,
+        ),
+        ChangeNotifierProxyProvider2<Preferences, MicroController, LedRing>(
+          create: (BuildContext context) => LedRing(
+              context.read<Preferences>(), context.read<MicroController>()),
+          update: (_, __, ___, ledRing) => ledRing!,
         ),
       ],
       child: MaterialApp(
         title: 'Flutter IoT Control',
         debugShowCheckedModeBanner: false,
-        home: TabbedHomePage(
-          initialIndex: initialTabIndex,
-        ),
+        home: TabbedHomePage(),
       ),
     );
   }

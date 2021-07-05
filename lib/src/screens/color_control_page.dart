@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:iot_app/src/models/led.dart';
 import 'package:iot_app/src/models/leds.dart';
-import 'package:iot_app/src/models/leds_model.dart';
+import 'package:iot_app/src/providers/led_ring.dart';
 import 'package:iot_app/src/widgets/multiple_circle_color_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:iot_app/src/models/led_state.dart';
@@ -23,7 +23,7 @@ class _ColorControlPageState extends State<ColorControlPage> {
                   MaterialStateProperty.all(Theme.of(context).primaryColor),
             ),
             onPressed: () {
-              Provider.of<LedsModel>(context, listen: false).turnOn();
+              Provider.of<LedRing>(context, listen: false).turnOn();
             },
             child: Text(
               'Turn back on',
@@ -34,19 +34,24 @@ class _ColorControlPageState extends State<ColorControlPage> {
       case LedState.loading:
         return CircularProgressIndicator();
       case LedState.error:
-        return Align(
-          alignment: Alignment.bottomCenter,
-          child: TextButton(
-            style: ButtonStyle(
-              backgroundColor:
-                  MaterialStateProperty.all(Theme.of(context).errorColor),
-            ),
-            onPressed: () {
-              Provider.of<LedsModel>(context, listen: false).refreshData();
-            },
-            child: Text(
-              'Retry',
-              style: Theme.of(context).primaryTextTheme.button,
+        return SafeArea(
+          child: Padding(
+            padding: EdgeInsets.only(bottom: 15),
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: TextButton(
+                style: ButtonStyle(
+                  backgroundColor:
+                      MaterialStateProperty.all(Theme.of(context).errorColor),
+                ),
+                onPressed: () {
+                  Provider.of<LedRing>(context, listen: false).refresh();
+                },
+                child: Text(
+                  'Error occurred, press to retry',
+                  style: Theme.of(context).primaryTextTheme.button,
+                ),
+              ),
             ),
           ),
         );
@@ -57,38 +62,35 @@ class _ColorControlPageState extends State<ColorControlPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<LedsModel>(
+    return Consumer<LedRing>(
       builder: (context, ledsModel, _) {
         final ledState = ledsModel.ledState;
         return Stack(
           children: [
-            if (ledsModel.ledConfiguration != null)
-              SafeArea(
-                child: Center(
-                  child: MultipleCircleColorPicker(
-                    selectedColors: ledsModel.ledConfiguration!.ledValues
-                        .map((e) => e.toColor())
-                        .toList(growable: false),
-                    onColorChanged: (int index, Color newColor) {
-                      ledsModel.updateLed(index, Led.fromColor(newColor));
-                      Navigator.of(context).pop();
-                    },
-                    onAllColorsChanged: (Color newColor) {
-                      ledsModel.updateLeds(Leds.all(Led.fromColor(newColor)));
-                      Navigator.of(context).pop();
-                    },
-                  ),
+            SafeArea(
+              child: Center(
+                child: MultipleCircleColorPicker(
+                  selectedColors: ledsModel.ledConfiguration.ledValues
+                      .map((e) => e.toColor())
+                      .toList(growable: false),
+                  onColorChanged: (int index, Color newColor) {
+                    ledsModel.updateLed(index, Led.fromColor(newColor));
+                    Navigator.of(context).pop();
+                  },
+                  onAllColorsChanged: (Color newColor) {
+                    ledsModel.updateLeds(Leds.all(Led.fromColor(newColor)));
+                    Navigator.of(context).pop();
+                  },
                 ),
               ),
+            ),
             if (ledState != LedState.on) ...[
               ModalBarrier(
                 color: Colors.black54,
               ),
-              SafeArea(
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: _buildFrontWidget(context, ledState),
-                ),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: _buildFrontWidget(context, ledState),
               ),
             ],
           ],
