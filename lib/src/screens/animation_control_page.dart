@@ -22,7 +22,7 @@ class AnimationControlPage extends StatefulWidget {
 }
 
 class _AnimationControlPageState extends State<AnimationControlPage>
-    with AutomaticKeepAliveClientMixin {
+    with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
   late final List<LedFrame> _animationFrames;
   late double _standardTime;
 
@@ -32,6 +32,13 @@ class _AnimationControlPageState extends State<AnimationControlPage>
 
   void saveChanges() {
     context.read<Preferences>().ledAnimationFrames = _animationFrames;
+    if (_animationFrames.isEmpty) {
+      _headerAnimationController.animateTo(1,
+          duration: Duration(milliseconds: 500));
+    } else {
+      _headerAnimationController.animateTo(0,
+          duration: Duration(milliseconds: 500));
+    }
   }
 
   void _duplicateFrameToLeft([int? i, int howOften = 1]) {
@@ -92,50 +99,55 @@ class _AnimationControlPageState extends State<AnimationControlPage>
     saveChanges();
   }
 
-  // TODO: Animate header
+  late final AnimationController _headerAnimationController;
+
   Widget _buildHeader() {
-    return Column(
-      children: [
-        ListTile(
-          title: Center(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 30),
-              child: Column(
-                children: [
-                  SizedBox(
-                    height: 16,
-                  ),
-                  TextButton(
-                    child: Icon(
-                      Icons.add,
-                      color: Theme.of(context).disabledColor,
-                      size: 40,
+    return SizeFadeTransition(
+      curve: Curves.easeInCubic,
+      animation: _headerAnimationController,
+      child: Column(
+        children: [
+          ListTile(
+            title: Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 30),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      height: 16,
                     ),
-                    onPressed: () {
-                      setState(_addNewFrame);
-                    },
-                  ),
-                  SizedBox(
-                    height: 24,
-                  ),
-                  Text(
-                    'No animation frames',
-                    style: Theme.of(context).textTheme.caption,
-                  ),
-                  SizedBox(
-                    height: 3,
-                  ),
-                  Text(
-                    "Press 'Add new' or the + icon to add one",
-                    style: Theme.of(context).textTheme.caption,
-                  ),
-                ],
+                    TextButton(
+                      child: Icon(
+                        Icons.add,
+                        color: Theme.of(context).disabledColor,
+                        size: 40,
+                      ),
+                      onPressed: () {
+                        setState(_addNewFrame);
+                      },
+                    ),
+                    SizedBox(
+                      height: 24,
+                    ),
+                    Text(
+                      'No animation frames',
+                      style: Theme.of(context).textTheme.caption,
+                    ),
+                    SizedBox(
+                      height: 3,
+                    ),
+                    Text(
+                      "Press 'Add new' or the + icon to add one",
+                      style: Theme.of(context).textTheme.caption,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-        Divider(),
-      ],
+          Divider(),
+        ],
+      ),
     );
   }
 
@@ -388,7 +400,7 @@ class _AnimationControlPageState extends State<AnimationControlPage>
           });
         },
         itemBuilder: _buildItem,
-        header: noFrames ? _buildHeader() : null,
+        header: _buildHeader(),
         footer: _buildFooter(),
       ),
     );
@@ -397,12 +409,17 @@ class _AnimationControlPageState extends State<AnimationControlPage>
   @override
   void initState() {
     _animationFrames = context.read<Preferences>().ledAnimationFrames;
-    print(context.read<Preferences>().ledAnimationFrames);
     _standardTime = 0.5;
 
     context
         .read<FloatingActionButtonEvents>()
         .addListener(_floatingActionButtonTapped);
+
+    _headerAnimationController = AnimationController(
+      value: _animationFrames.isEmpty ? 1 : 0,
+      vsync: this,
+      duration: Duration(seconds: 1),
+    );
 
     super.initState();
   }
