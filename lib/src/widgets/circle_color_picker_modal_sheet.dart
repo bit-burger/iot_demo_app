@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'multiple_circle_color_picker.dart';
 
+// TODO: Buttons to do extra things, like turn one to left
+// TODO: Display time and make it changeable
 class CircleColorPickerModalSheet extends StatefulWidget {
   CircleColorPickerModalSheet({
     required this.onChangedColors,
@@ -39,26 +41,23 @@ class _CircleColorPickerModalSheetState
           ),
         ),
         Container(
-          height: 400,
-          child: SafeArea(
-            top: false,
-            child: MultipleCircleColorPicker(
-              selectedColors: colorValues,
-              onAllColorsChanged: (newColor) {
-                setState(() {
-                  colorValues = List<Color>.generate(12, (index) => newColor);
-                  widget.onChangedColors(null, newColor);
-                  Navigator.of(context).pop();
-                });
-              },
-              onColorChanged: (int index, Color newColor) {
-                setState(() {
-                  colorValues[index] = newColor;
-                  widget.onChangedColors(index, newColor);
-                  Navigator.of(context).pop();
-                });
-              },
-            ),
+          height: 450,
+          child: MultipleCircleColorPicker(
+            selectedColors: colorValues,
+            onAllColorsChanged: (newColor) {
+              setState(() {
+                colorValues = List<Color>.generate(12, (index) => newColor);
+                widget.onChangedColors(null, newColor);
+                Navigator.of(context).pop();
+              });
+            },
+            onColorChanged: (int index, Color newColor) {
+              setState(() {
+                colorValues[index] = newColor;
+                widget.onChangedColors(index, newColor);
+                Navigator.of(context).pop();
+              });
+            },
           ),
           decoration: BoxDecoration(
             color: Colors.white,
