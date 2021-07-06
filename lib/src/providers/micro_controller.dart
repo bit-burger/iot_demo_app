@@ -15,15 +15,17 @@ class MicroController {
   MicroController(this._preferences) : _httpClient = http.Client();
 
   final Preferences _preferences;
+
   final http.Client _httpClient;
 
-  Future<Result<dynamic?>> makeRequest(
+  Future<Result<dynamic>> makeRequest(
     String path, [
     Method method = Method.GET,
-    dynamic? jsonBody,
+    dynamic jsonBody,
   ]) async {
-    assert(method != Method.GET || jsonBody == null);
-    assert(jsonBody != null || method == Method.GET);
+    final methodRequiresBody = method != Method.GET && method != Method.DELETE;
+    assert(methodRequiresBody && jsonBody != null ||
+        !methodRequiresBody && jsonBody == null);
     assert(path.startsWith('/'));
 
     final parsedUrl = Uri.parse(_preferences.url + path);
@@ -31,26 +33,26 @@ class MicroController {
 
     try {
       final response = await _getResponse(method, parsedUrl, parsedBody);
-      if (response.statusCode == 200) {
+      if (response.statusCode >= 200 && response.statusCode < 300) {
         final rawJson = response.body;
-
         if (rawJson.isEmpty) return Result.value(null);
-
         final parsedJson = convert.jsonDecode(rawJson);
-
         return Result.value(parsedJson);
-      } else {
+      } else if (response.statusCode == 409) {
         return Result.error(
-          'Could not reach the micro controller,'
-          'make sure it is on and connected to your local w-lan',
+          MicroControllerErrors.AnimationError,
         );
       }
+      return Result.error(
+        MicroControllerErrors.ConnectionError,
+      );
     } on TimeoutException {
-      return Result.error('Request to micro controller timed out');
+      return Result.error(
+        MicroControllerErrors.ConnectionError,
+      );
     } on Exception {
       return Result.error(
-        'Unknown error while requesting data'
-        'from the micro controller',
+        MicroControllerErrors.ConnectionError,
       );
     }
   }
@@ -60,6 +62,8 @@ class MicroController {
     switch (method) {
       case Method.GET:
         return _httpClient.get(parsedUrl);
+      case Method.DELETE:
+        return _httpClient.delete(parsedUrl);
       case Method.PUT:
         return _httpClient.put(
           parsedUrl,
@@ -78,4 +82,6 @@ class MicroController {
   }
 }
 
-enum Method { GET, PUT, POST }
+enum Method { GET, PUT, POST, DELETE }
+
+enum MicroControllerErrors { ConnectionError, AnimationError }

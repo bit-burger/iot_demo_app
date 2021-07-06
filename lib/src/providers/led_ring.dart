@@ -24,7 +24,7 @@ class LedRing extends ChangeNotifier {
 
   Leds get ledConfiguration => _ledConfiguration;
 
-  LedState get ledState => _ledState;
+  LedState get state => _ledState;
 
   bool get isActive => _ledState == LedState.on || _ledState == LedState.off;
 
@@ -83,6 +83,28 @@ class LedRing extends ChangeNotifier {
     );
   }
 
+  void connectionError() {
+    _ledState = LedState.connectionError;
+    nL();
+  }
+
+  void startedLoading() {
+    _ledState = LedState.loading;
+    nL();
+  }
+
+  void startedAnimating() {
+    _ledState = LedState.animating;
+    nL();
+  }
+
+  void stoppedAnimating() {
+    if (_ledState != LedState.animating && _ledState != LedState.loading)
+      return;
+    _ledState = _ledConfiguration.isOff ? LedState.off : LedState.on;
+    nL();
+  }
+
   void _updateLeds(
     Future<Leds> updatingTask(), {
     bool forceOverrideConfiguration = false,
@@ -101,15 +123,19 @@ class LedRing extends ChangeNotifier {
         if (forceOverrideConfiguration) _setLedConfiguration(leds);
         _ledState = leds.isOff ? LedState.off : LedState.on;
       }
-    } on Exception {
-      _ledState = LedState.error;
+    } on MicroControllerErrors catch (e) {
+      if (e == MicroControllerErrors.AnimationError) {
+        _ledState = LedState.animating;
+      } else {
+        _ledState = LedState.connectionError;
+      }
     }
     nL();
   }
 
   Future<Leds> _getLeds() async {
     final result = await _microController.makeRequest('/leds');
-    if (result.isError) throw Exception(result.asError!.error);
+    if (result.isError) throw result.asError!.error;
     final json = result.asValue!.value!;
     return Leds.fromJson(json);
   }
@@ -117,7 +143,7 @@ class LedRing extends ChangeNotifier {
   Future<Leds> _setLeds(Leds leds) async {
     final result =
         await _microController.makeRequest('/leds', Method.PUT, leds);
-    if (result.isError) throw Exception(result.asError!.error);
+    if (result.isError) throw result.asError!.error;
     final json = result.asValue!.value!;
     return Leds.fromJson(json);
   }

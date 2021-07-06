@@ -62,28 +62,45 @@ class _SettingsState extends State<SettingsPage> {
     }
   }
 
-  Widget _buildConnectionStatus(LedState ledState) {
+  String connectionStatusText(LedState ledState) {
     switch (ledState) {
       case LedState.loading:
-        return CircularProgressIndicator();
+        return 'Loading';
+      case LedState.connectionError:
+        return 'Errored';
       default:
-        return Text.rich(
-          TextSpan(
-            text: 'Connection Status: ',
-            children: [
-              TextSpan(
-                text: ledState != LedState.error ? 'Connected' : 'Errored',
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-          style: TextStyle(
-            color: ledState != LedState.error ? Colors.blueAccent : Colors.red,
-          ),
-        );
+        return 'Connected';
     }
+  }
+
+  Color connectionStatusColor(LedState ledState) {
+    switch (ledState) {
+      case LedState.loading:
+        return Colors.black;
+      case LedState.connectionError:
+        return Colors.red;
+      default:
+        return Colors.blueAccent;
+    }
+  }
+
+  Widget _buildConnectionStatus(LedState ledState) {
+    return Text.rich(
+      TextSpan(
+        text: 'Connection Status: ',
+        children: [
+          TextSpan(
+            text: connectionStatusText(ledState),
+            style: TextStyle(
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+      style: TextStyle(
+        color: connectionStatusColor(ledState),
+      ),
+    );
   }
 
   @override
@@ -123,7 +140,7 @@ class _SettingsState extends State<SettingsPage> {
             SizedBox(height: 20),
             Consumer<LedRing>(
               builder: (_, ledRing, __) =>
-                  _buildConnectionStatus(ledRing.ledState),
+                  _buildConnectionStatus(ledRing.state),
             ),
           ],
         ),

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -8,8 +10,10 @@ import 'package:implicitly_animated_reorderable_list/implicitly_animated_reorder
 import 'package:implicitly_animated_reorderable_list/transitions.dart';
 import 'package:iot_app/src/models/led.dart';
 import 'package:iot_app/src/models/led_frame.dart';
+import 'package:iot_app/src/models/led_state.dart';
 import 'package:iot_app/src/models/leds.dart';
 import 'package:iot_app/src/providers/floating_action_button_events.dart';
+import 'package:iot_app/src/providers/led_ring.dart';
 import 'package:iot_app/src/providers/micro_controller.dart';
 import 'package:iot_app/src/providers/preferences.dart';
 import 'package:iot_app/src/providers/tab_view_index.dart';
@@ -21,21 +25,16 @@ class AnimationControlPage extends StatefulWidget {
   @override
   _AnimationControlPageState createState() => _AnimationControlPageState();
 }
-// TODO: make sure errors and animation is handled accordingly:
-//       - if any command on normal is done (like turning off and on),
-//       - an error should be returned by the api and be showed
-//       - that is why also the error message must be recorded and displayed
-//       - if animation is already running and new one is put on top it should be overridden
-//       - animation stop button must exist (maybe long press on FAB)
-//       - if any other error happens on animation, it should be displayed with a snack bar
+// TODO: On the modal barrier, put an animating led ring
+// TODO: To new buttons: Delete all, reset frame time on all
 
 class _AnimationControlPageState extends State<AnimationControlPage>
     with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
   late final List<LedFrame> _animationFrames;
 
-  // TODO: have these two values also saved in Preferences
   late double _newFrameTime;
   late int _repeat;
+  Timer? _animationTimer;
 
   bool get noFrames => _animationFrames.length == 0;
 
@@ -468,21 +467,100 @@ class _AnimationControlPageState extends State<AnimationControlPage>
       duration: Duration(seconds: 1),
     );
 
+    final ledRing = context.read<LedRing>();
+
+    ledRing.addListener(() {
+      if (ledRing.isActive) {
+        _animationTimer?.cancel();
+        _animationTimer = null;
+      }
+    });
+
     super.initState();
   }
 
   @override
   bool get wantKeepAlive => true;
 
-  void _floatingActionButtonTapped() {
-    final tabIndex = context.read<TabViewIndex>();
-    if (tabIndex.index != 2) return;
-    final microController = context.read<MicroController>();
-    microController.makeRequest('/animation', Method.POST, {
+  void displayErrorMessage(String errorMessage) {
+    final snackBar = SnackBar(
+      content: Text(
+        errorMessage,
+        textAlign: TextAlign.center,
+        // style: Theme.of(context).snackBarTheme.contentTextStyle,
+      ),
+      backgroundColor: Colors.red,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  void stopAnimating(LedRing ledRing, MicroController microController) async {
+    if (ledRing.state == LedState.loading) {
+      return displayErrorMessage(
+        'A request to micro controller is still loading,'
+        ' please wait for it to complete',
+      );
+    }
+    ledRing.startedLoading();
+    _animationTimer?.cancel();
+    _animationTimer = null;
+    final result =
+        await microController.makeRequest('/cancel-animation', Method.DELETE);
+    if (result.isValue) {
+      ledRing.stoppedAnimating();
+    } else if (result.asError!.error == MicroControllerErrors.AnimationError) {
+      displayErrorMessage('Animation was already stopped');
+      ledRing.stoppedAnimating();
+    } else {
+      ledRing.connectionError();
+    }
+  }
+
+  void startAnimating(LedRing ledRing, MicroController microController) async {
+    _animationTimer?.cancel();
+    _animationTimer = null;
+    if (ledRing.state == LedState.loading) {
+      return displayErrorMessage(
+        'A request to micro controller is still loading,'
+        ' please wait for it to complete',
+      );
+    }
+    ledRing.startedLoading();
+    final result =
+        await microController.makeRequest('/animation', Method.POST, {
       'repeat': _repeat,
       'frames': _animationFrames
           .map((frame) => frame.toJson())
           .toList(growable: false),
     });
+    if (result.isValue) {
+      ledRing.startedAnimating();
+      final secondsTillAnimationStop = _animationFrames.fold<double>(
+              0, (previousValue, frame) => previousValue += frame.time) *
+          _repeat.toDouble();
+      _animationTimer = Timer(
+        Duration(milliseconds: (secondsTillAnimationStop * 1000).toInt()),
+        () {
+          ledRing.stoppedAnimating();
+        },
+      );
+    } else if (result.asError!.error == MicroControllerErrors.AnimationError) {
+      ledRing.startedAnimating();
+      displayErrorMessage('Already animating');
+    } else {
+      ledRing.connectionError();
+    }
+  }
+
+  void _floatingActionButtonTapped() async {
+    final tabIndex = context.read<TabViewIndex>();
+    final ledRing = context.read<LedRing>();
+    final microController = context.read<MicroController>();
+
+    if (ledRing.state == LedState.animating) {
+      stopAnimating(ledRing, microController);
+    } else if (tabIndex.index == 2) {
+      startAnimating(ledRing, microController);
+    }
   }
 }

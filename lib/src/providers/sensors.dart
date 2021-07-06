@@ -3,6 +3,8 @@ import 'package:iot_app/src/models/sensor_data.dart';
 import 'package:iot_app/src/models/sensor_state.dart';
 import 'package:iot_app/src/providers/micro_controller.dart';
 
+// TODO: If sensors are not reachable, then the ledState should be updated to an error
+
 class Sensors extends ChangeNotifier {
   Sensors(this._microController) : _sensorState = SensorState.loading {
     refresh();

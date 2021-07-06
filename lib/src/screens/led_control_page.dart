@@ -9,37 +9,18 @@ class LedControlPage extends StatefulWidget {
 }
 
 class _LedControlPageState extends State<LedControlPage> {
-  _buildLowerWidget(BuildContext context, LedState ledState) {
-    switch (ledState) {
-      case LedState.on:
-      case LedState.off:
-        return Switch.adaptive(
-          value: ledState == LedState.on,
-          onChanged: (v) {
-            final ledsModel = Provider.of<LedRing>(context, listen: false);
-            if (v) {
-              return ledsModel.turnOn();
-            }
-            ledsModel.turnOff();
-          },
-        );
-      case LedState.loading:
-        return CircularProgressIndicator();
-      case LedState.error:
-        return TextButton(
-          style: ButtonStyle(
-            backgroundColor:
-                MaterialStateProperty.all(Theme.of(context).errorColor),
-          ),
-          onPressed: () {
-            Provider.of<LedRing>(context, listen: false).refresh();
-          },
-          child: Text(
-            'Retry',
-            style: Theme.of(context).primaryTextTheme.button,
-          ),
-        );
-    }
+  Widget _buildLowerWidget(BuildContext context, LedRing ledRing) {
+    if (!ledRing.isActive) return CircularProgressIndicator();
+    return Switch.adaptive(
+      value: ledRing.state == LedState.on,
+      onChanged: (v) {
+        final ledsModel = Provider.of<LedRing>(context, listen: false);
+        if (v) {
+          return ledsModel.turnOn();
+        }
+        ledsModel.turnOff();
+      },
+    );
   }
 
   @override
@@ -49,15 +30,15 @@ class _LedControlPageState extends State<LedControlPage> {
         child: Padding(
           padding: EdgeInsets.all(60),
           child: Consumer<LedRing>(
-            builder: (context, ledsModel, _) {
-              final state = ledsModel.ledState;
+            builder: (context, ledRing, _) {
+              final state = ledRing.state;
               return Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Expanded(
                     child: Align(
                       alignment: Alignment.bottomCenter,
-                      child: Text(state.toStringLong()),
+                      child: Text(state.description()),
                     ),
                   ),
                   SizedBox(
@@ -66,7 +47,7 @@ class _LedControlPageState extends State<LedControlPage> {
                   Expanded(
                     child: Align(
                       alignment: Alignment.topCenter,
-                      child: _buildLowerWidget(context, ledsModel.ledState),
+                      child: _buildLowerWidget(context, ledRing),
                     ),
                   )
                 ],

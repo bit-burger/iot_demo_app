@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'multiple_circle_color_picker.dart';
 
 // TODO: Buttons to do extra things, like turn one to left
-// TODO: Display time and make it changeable
+// TODO: Display frame time and make it changeable
 class CircleColorPickerModalSheet extends StatefulWidget {
   CircleColorPickerModalSheet({
     required this.onChangedColors,
