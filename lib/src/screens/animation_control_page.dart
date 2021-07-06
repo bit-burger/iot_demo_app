@@ -26,7 +26,6 @@ class AnimationControlPage extends StatefulWidget {
   _AnimationControlPageState createState() => _AnimationControlPageState();
 }
 // TODO: On the modal barrier, put an animating led ring
-// TODO: To new buttons: Delete all, reset frame time on all
 
 class _AnimationControlPageState extends State<AnimationControlPage>
     with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
@@ -83,8 +82,10 @@ class _AnimationControlPageState extends State<AnimationControlPage>
     saveChanges();
   }
 
-  void _removeFrame([int? i]) {
-    _animationFrames.removeAt(i ?? lastFrameIndex);
+  void _deleteFrame([int? i, int howOften = 1]) {
+    for (var j = 0; j < howOften; j++) {
+      _animationFrames.removeAt(i ?? lastFrameIndex);
+    }
     saveChanges();
   }
 
@@ -95,6 +96,13 @@ class _AnimationControlPageState extends State<AnimationControlPage>
 
   void _resetFrameTime([int? i]) {
     _animationFrames[i ?? lastFrameIndex].time = _newFrameTime;
+    saveChanges();
+  }
+
+  void _resetAllFrameTimes() {
+    for (var i = 0; i < _animationFrames.length; i++) {
+      _animationFrames[i].time = _newFrameTime;
+    }
     saveChanges();
   }
 
@@ -186,7 +194,11 @@ class _AnimationControlPageState extends State<AnimationControlPage>
               ),
               TextButton(
                 child: Text('Delete last'),
-                onPressed: noFrames ? null : () => setState(_removeFrame),
+                onPressed: noFrames ? null : () => setState(_deleteFrame),
+                onLongPress: noFrames
+                    ? null
+                    : () => setState(
+                        () => _deleteFrame(0, _animationFrames.length)),
               ),
               TextButton(
                 child: Text('Duplicate last'),
@@ -210,6 +222,11 @@ class _AnimationControlPageState extends State<AnimationControlPage>
                 onLongPress: noFrames
                     ? null
                     : () => setState(() => _duplicateFrameToRight(null, 11)),
+              ),
+              TextButton(
+                child: Text('All adapt global frame time'),
+                onPressed:
+                    noFrames ? null : () => setState(_resetAllFrameTimes),
               ),
             ],
           ),
@@ -316,7 +333,7 @@ class _AnimationControlPageState extends State<AnimationControlPage>
         ),
         PopupMenuDivider(),
         PopupMenuItem(
-          value: (i) => setState(() => _removeFrame(i)),
+          value: (i) => setState(() => _deleteFrame(i)),
           child: Text('Delete'),
         ),
       ],
@@ -409,7 +426,7 @@ class _AnimationControlPageState extends State<AnimationControlPage>
           secondaryActions: [
             SlideAction(
               onTap: () {
-                setState(() => _removeFrame(index));
+                setState(() => _deleteFrame(index));
               },
               color: Colors.redAccent,
               child: Center(
