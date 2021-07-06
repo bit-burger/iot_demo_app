@@ -1,6 +1,10 @@
 const String defaultUrl = 'http://iot-controller';
 
-const int initialTabIndex = 1;
+const int defaultTabIndex = 1;
+
+const double defaultNewFrameTime = 0.5;
+
+const int defaultFrameRepeat = 10;
 
 final RegExp urlRegex =
     RegExp(r"^https?:\/\/((?!(\.\.|--|__|::))[\d\w-:.])*[\d\w]$");

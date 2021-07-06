@@ -9,6 +9,9 @@ class Preferences {
   static const String ledAnimationFramesKey = 'ledAnimationFrames';
   static const String ledColorsKey = 'ledColors';
   static const String urlKey = 'url';
+  static const String newFrameTimeKey = 'newFrameTime';
+  static const String frameRepeatKey = 'frameRepeat';
+
   static late final SharedPreferences sharedPreferences;
 
   Preferences.specifySharedPreferences(this._sharedPreferences);
@@ -25,7 +28,7 @@ class Preferences {
   set url(String newUrl) => _sharedPreferences.setString(urlKey, newUrl);
 
   int get tab =>
-      _sharedPreferences.getInt(tabIndexKey) ?? constants.initialTabIndex;
+      _sharedPreferences.getInt(tabIndexKey) ?? constants.defaultTabIndex;
 
   set tab(int newTab) => _sharedPreferences.setInt(tabIndexKey, newTab);
 
@@ -56,6 +59,19 @@ class Preferences {
       _sharedPreferences.setString(ledAnimationFramesKey, jsonString);
     });
   }
+
+  double get newFrameTime =>
+      _sharedPreferences.getDouble(newFrameTimeKey) ??
+      constants.defaultNewFrameTime;
+
+  set newFrameTime(double newNewFrameTime) =>
+      _sharedPreferences.setDouble(newFrameTimeKey, newNewFrameTime);
+
+  int get frameRepeat =>
+      _sharedPreferences.getInt(frameRepeatKey) ?? constants.defaultFrameRepeat;
+
+  set frameRepeat(newFrameRepeat) =>
+      _sharedPreferences.setInt(frameRepeatKey, newFrameRepeat);
 
   Leds get ledColors {
     final rawJson = _sharedPreferences.getString(ledColorsKey);

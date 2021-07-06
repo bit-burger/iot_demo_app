@@ -34,7 +34,7 @@ class _AnimationControlPageState extends State<AnimationControlPage>
   late final List<LedFrame> _animationFrames;
 
   // TODO: have these two values also saved in Preferences
-  late double _standardTime;
+  late double _newFrameTime;
   late int _repeat;
 
   bool get noFrames => _animationFrames.length == 0;
@@ -79,7 +79,7 @@ class _AnimationControlPageState extends State<AnimationControlPage>
   void _addNewFrame([int? i, int howOften = 1]) {
     for (var j = 0; j < howOften; j++) {
       _animationFrames.insert(
-          i ?? lastFrameIndex + 1, LedFrame(Leds.off(), _standardTime));
+          i ?? lastFrameIndex + 1, LedFrame(Leds.off(), _newFrameTime));
     }
     saveChanges();
   }
@@ -95,7 +95,7 @@ class _AnimationControlPageState extends State<AnimationControlPage>
   }
 
   void _resetFrameTime([int? i]) {
-    _animationFrames[i ?? lastFrameIndex].time = _standardTime;
+    _animationFrames[i ?? lastFrameIndex].time = _newFrameTime;
     saveChanges();
   }
 
@@ -223,10 +223,10 @@ class _AnimationControlPageState extends State<AnimationControlPage>
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(() {
-                final timeAsString = _standardTime.toString();
+                final timeAsString = _newFrameTime.toString();
                 return 'Frame time for new frames: ' +
                     timeAsString +
-                    (_standardTime.toString().length == 3 ? '0' : '') +
+                    (_newFrameTime.toString().length == 3 ? '0' : '') +
                     ' seconds';
               }()),
             ),
@@ -235,13 +235,14 @@ class _AnimationControlPageState extends State<AnimationControlPage>
             min: 0,
             max: 10,
             divisions: 40,
-            value: _standardTime,
-            label: _standardTime.toString(),
+            value: _newFrameTime,
+            label: _newFrameTime.toString(),
             onChanged: (v) {
               if (v == 0) return;
               HapticFeedback.selectionClick();
               setState(() {
-                _standardTime = v;
+                _newFrameTime = v;
+                context.read<Preferences>().newFrameTime = _newFrameTime;
               });
             },
           ),
@@ -273,6 +274,7 @@ class _AnimationControlPageState extends State<AnimationControlPage>
               HapticFeedback.selectionClick();
               setState(() {
                 _repeat = v.toInt();
+                context.read<Preferences>().frameRepeat = _repeat;
               });
             },
           ),
@@ -450,9 +452,11 @@ class _AnimationControlPageState extends State<AnimationControlPage>
 
   @override
   void initState() {
-    _animationFrames = context.read<Preferences>().ledAnimationFrames;
-    _standardTime = 0.5;
-    _repeat = 100;
+    final preferences = context.read<Preferences>();
+
+    _animationFrames = preferences.ledAnimationFrames;
+    _newFrameTime = preferences.newFrameTime;
+    _repeat = preferences.frameRepeat;
 
     context
         .read<FloatingActionButtonEvents>()
