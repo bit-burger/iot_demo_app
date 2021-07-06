@@ -474,7 +474,7 @@ class _AnimationControlPageState extends State<AnimationControlPage>
     final tabIndex = context.read<TabViewIndex>();
     if (tabIndex.index != 2) return;
     final microController = context.read<MicroController>();
-    microController.makeRequest('/animation', Method.PUT, {
+    microController.makeRequest('/animation', Method.POST, {
       'repeat': _repeat,
       'frames': _animationFrames
           .map((frame) => frame.toJson())
