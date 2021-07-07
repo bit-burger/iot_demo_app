@@ -1,21 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:iot_app/src/models/led_state.dart';
 import 'package:iot_app/src/models/sensor_data.dart';
 import 'package:iot_app/src/models/sensor_state.dart';
+import 'package:iot_app/src/providers/led_ring.dart';
 import 'package:iot_app/src/providers/micro_controller.dart';
 
-// TODO: If sensors are not reachable, then the ledState should be updated to an error
-
 class Sensors extends ChangeNotifier {
-  Sensors(this._microController) : _sensorState = SensorState.loading {
+  Sensors(this._microController, this._ledRing)
+      : _sensorState = SensorState.loading {
     refresh();
+    _ledRing.addListener(() {
+      if (_ledRing.state == LedState.connectionError) {
+        _sensorState = SensorState.error;
+      } else if (_sensorState == SensorState.error && _ledRing.isActive) {
+        refresh();
+      }
+    });
   }
 
   MicroController _microController;
+  LedRing _ledRing;
 
   SensorState _sensorState;
   SensorData? _sensorData;
 
-  SensorState get sensorState => _sensorState;
+  SensorState get state => _sensorState;
 
   SensorData get sensorData => _sensorData!;
 
@@ -30,6 +39,7 @@ class Sensors extends ChangeNotifier {
       _sensorData = SensorData.fromJson(json);
       _sensorState = SensorState.value;
     } else {
+      _ledRing.connectionError();
       _sensorState = SensorState.error;
     }
     notifyListeners();

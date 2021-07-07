@@ -38,15 +38,15 @@ class MyApp extends StatelessWidget {
               MicroController(context.read<Preferences>()),
           update: (_, __, microController) => microController!,
         ),
-        ChangeNotifierProxyProvider<MicroController, Sensors>(
-          create: (BuildContext context) =>
-              Sensors(context.read<MicroController>()),
-          update: (_, __, sensors) => sensors!,
-        ),
         ChangeNotifierProxyProvider2<Preferences, MicroController, LedRing>(
           create: (BuildContext context) => LedRing(
               context.read<Preferences>(), context.read<MicroController>()),
           update: (_, __, ___, ledRing) => ledRing!,
+        ),
+        ChangeNotifierProxyProvider2<MicroController, LedRing, Sensors>(
+          create: (BuildContext context) =>
+              Sensors(context.read<MicroController>(), context.read<LedRing>()),
+          update: (_, __, ___, sensors) => sensors!,
         ),
       ],
       child: MaterialApp(

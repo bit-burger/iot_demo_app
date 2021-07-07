@@ -14,7 +14,7 @@ class _SensorsPageState extends State<SensorsPage>
     with AutomaticKeepAliveClientMixin {
   Widget _buildInformationArea() {
     final sensors = Provider.of<Sensors>(context);
-    switch (sensors.sensorState) {
+    switch (sensors.state) {
       case SensorState.value:
         return Center(
           child: Padding(
