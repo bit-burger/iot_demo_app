@@ -65,10 +65,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
               textAlign: TextAlign.center,
             ),
           ),
-          Padding(
-            padding: EdgeInsets.only(right: 50),
-            child: action,
-          ),
+          action,
         ],
       );
 
@@ -106,22 +103,25 @@ class _TabbedHomePageState extends State<TabbedHomePage>
         return _titledAction(
             title:
                 'The leds are animating, press the button below to stop animating',
-            action: Wrap(
-              spacing: 16,
-              children: [
-                _coloredButtonAction(
-                  title: 'Stop animation',
-                  onPressed: () => context
-                      .read<FloatingActionButtonEvents>()
-                      .floatingActionButtonPressed(),
-                  backgroundColor: Colors.blue,
-                ),
-                _coloredButtonAction(
-                  title: 'Retry',
-                  onPressed: () => ledRing.refresh(),
-                  backgroundColor: Colors.red,
-                ),
-              ],
+            action: Padding(
+              padding: EdgeInsets.only(right: 50),
+              child: Wrap(
+                spacing: 16,
+                children: [
+                  _coloredButtonAction(
+                    title: 'Stop animation',
+                    onPressed: () => context
+                        .read<FloatingActionButtonEvents>()
+                        .floatingActionButtonPressed(),
+                    backgroundColor: Colors.blue,
+                  ),
+                  _coloredButtonAction(
+                    title: 'Retry',
+                    onPressed: () => ledRing.refresh(),
+                    backgroundColor: Colors.red,
+                  ),
+                ],
+              ),
             ));
       case LedState.connectionError:
         return _titledAction(
