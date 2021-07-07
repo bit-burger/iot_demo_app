@@ -503,8 +503,6 @@ class _AnimationControlPageState extends State<AnimationControlPage>
     final snackBar = SnackBar(
       content: Text(
         errorMessage,
-        textAlign: TextAlign.center,
-        // style: Theme.of(context).snackBarTheme.contentTextStyle,
       ),
       backgroundColor: Colors.red,
     );
@@ -542,6 +540,11 @@ class _AnimationControlPageState extends State<AnimationControlPage>
         ' please wait for it to complete',
       );
     }
+    if (_animationFrames.isEmpty) {
+      return displayErrorMessage(
+        'At least one frame is needed for animating',
+      );
+    }
     ledRing.startedLoading();
     final result =
         await microController.makeRequest('/animation', Method.POST, {
@@ -563,7 +566,7 @@ class _AnimationControlPageState extends State<AnimationControlPage>
       );
     } else if (result.asError!.error == MicroControllerErrors.AnimationError) {
       ledRing.startedAnimating();
-      displayErrorMessage('Already animating');
+      displayErrorMessage('The led ring is already animating');
     } else {
       ledRing.connectionError();
     }
