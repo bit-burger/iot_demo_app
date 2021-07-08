@@ -14,8 +14,7 @@ class SensorsPage extends StatefulWidget {
 
 class _SensorsPageState extends State<SensorsPage>
     with AutomaticKeepAliveClientMixin {
-  Iterable<Widget> _buildInformationArea() sync* {
-    final sensors = context.read<Sensors>();
+  Iterable<Widget> _buildInformationArea(Sensors sensors) sync* {
     final ledRing = context.read<LedRing>();
     yield Center(
       child: Padding(
@@ -45,12 +44,13 @@ class _SensorsPageState extends State<SensorsPage>
 
   @override
   Widget build(BuildContext context) {
+    final sensors = context.watch<Sensors>();
     super.build(context);
     return SafeArea(
       child: Center(
         child: Column(
           children: [
-            ..._buildInformationArea(),
+            ..._buildInformationArea(sensors),
           ],
         ),
       ),
