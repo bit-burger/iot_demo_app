@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:iot_app/src/models/led_state.dart';
 import 'package:iot_app/src/models/sensor_state.dart';
 import 'package:iot_app/src/providers/floating_action_button_events.dart';
+import 'package:iot_app/src/providers/led_ring.dart';
 import 'package:iot_app/src/providers/tab_view_index.dart';
 import 'package:iot_app/src/providers/sensors.dart';
 import 'package:provider/provider.dart';
@@ -12,44 +14,32 @@ class SensorsPage extends StatefulWidget {
 
 class _SensorsPageState extends State<SensorsPage>
     with AutomaticKeepAliveClientMixin {
-  Widget _buildInformationArea() {
-    final sensors = Provider.of<Sensors>(context);
-    switch (sensors.state) {
-      case SensorState.value:
-        return Center(
-          child: Padding(
-            padding: EdgeInsets.all(25),
-            child: Column(
-              children: [
-                ListTile(
-                  title: Text('Temperature: ' +
-                      sensors.sensorData.temperature.toString() +
-                      "°C"),
-                ),
-                Divider(),
-                ListTile(
-                  title: Text('Humidity: ' +
-                      sensors.sensorData.humidity.toString() +
-                      "%"),
-                ),
-              ],
+  Iterable<Widget> _buildInformationArea() sync* {
+    final sensors = context.read<Sensors>();
+    final ledRing = context.read<LedRing>();
+    yield Center(
+      child: Padding(
+        padding: EdgeInsets.all(25),
+        child: Column(
+          children: [
+            ListTile(
+              title: Text(
+                'Temperature: ' + sensors.sensorData.temperature,
+              ),
             ),
-          ),
-        );
-      case SensorState.loading:
-        return CircularProgressIndicator();
-      case SensorState.error:
-        return Center(
-          child: Padding(
-            padding: EdgeInsets.all(50),
-            child: Text(
-              'Something went wrong, '
-              'make sure your sensors are connected, '
-              'and your board is connected to your local wlan',
-              textAlign: TextAlign.center,
+            Divider(),
+            ListTile(
+              title: Text(
+                'Humidity: ' + sensors.sensorData.temperature,
+              ),
             ),
-          ),
-        );
+          ],
+        ),
+      ),
+    );
+    if (sensors.state == SensorState.loading &&
+        ledRing.state != LedState.loading) {
+      yield CircularProgressIndicator();
     }
   }
 
@@ -58,7 +48,11 @@ class _SensorsPageState extends State<SensorsPage>
     super.build(context);
     return SafeArea(
       child: Center(
-        child: _buildInformationArea(),
+        child: Column(
+          children: [
+            ..._buildInformationArea(),
+          ],
+        ),
       ),
     );
   }

@@ -7,7 +7,8 @@ import 'package:iot_app/src/providers/micro_controller.dart';
 
 class Sensors extends ChangeNotifier {
   Sensors(this._microController, this._ledRing)
-      : _sensorState = SensorState.loading {
+      : _sensorState = SensorState.loading,
+        _sensorData = SensorData.noData() {
     refresh();
     _ledRing.addListener(() {
       if (_ledRing.state == LedState.connectionError) {
@@ -22,14 +23,13 @@ class Sensors extends ChangeNotifier {
   LedRing _ledRing;
 
   SensorState _sensorState;
-  SensorData? _sensorData;
+  SensorData _sensorData;
 
   SensorState get state => _sensorState;
 
-  SensorData get sensorData => _sensorData!;
+  SensorData get sensorData => _sensorData;
 
   void refresh() async {
-    _sensorData = null;
     _sensorState = SensorState.loading;
     notifyListeners();
 
@@ -39,6 +39,7 @@ class Sensors extends ChangeNotifier {
       _sensorData = SensorData.fromJson(json);
       _sensorState = SensorState.value;
     } else {
+      _sensorData = SensorData.noData();
       _ledRing.connectionError();
       _sensorState = SensorState.error;
     }
