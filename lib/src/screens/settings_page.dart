@@ -68,6 +68,8 @@ class _SettingsState extends State<SettingsPage> {
         return 'Loading';
       case LedState.connectionError:
         return 'Errored';
+      case LedState.animating:
+        return 'Animating';
       default:
         return 'Connected';
     }
@@ -79,6 +81,8 @@ class _SettingsState extends State<SettingsPage> {
         return Colors.black;
       case LedState.connectionError:
         return Colors.red;
+      case LedState.animating:
+        return Colors.orange;
       default:
         return Colors.blueAccent;
     }
