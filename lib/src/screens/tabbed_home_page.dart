@@ -21,20 +21,12 @@ class _TabbedHomePageState extends State<TabbedHomePage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
-  List<IconData?> tabIconList = [
-    null,
-    null,
-    Icons.play_arrow,
-    Icons.refresh,
-    null,
-  ];
-
   List<bool> iconShouldBeOverriddenByAnimationStopper = [
     true,
     true,
     true,
     false,
-    false,
+    true,
   ];
 
   List<Set<LedState>> statesList = [
@@ -113,12 +105,12 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                     onPressed: () => context
                         .read<FloatingActionButtonEvents>()
                         .floatingActionButtonPressed(),
-                    backgroundColor: Colors.blue,
+                    backgroundColor: Colors.orange,
                   ),
                   _coloredButtonAction(
                     title: 'Retry',
                     onPressed: () => ledRing.refresh(),
-                    backgroundColor: Colors.red,
+                    backgroundColor: Colors.blue,
                   ),
                 ],
               ),
@@ -153,51 +145,81 @@ class _TabbedHomePageState extends State<TabbedHomePage>
     );
   }
 
-  Widget _customTabFloatingActionButton(IconData customIcon) {
-    return FloatingActionButton(
-      onPressed: () => context
-          .read<FloatingActionButtonEvents>()
-          .floatingActionButtonPressed(),
-      backgroundColor: customIcon == Icons.play_arrow ? Colors.green : null,
-      child: Icon(
-        customIcon,
-      ),
-    );
-  }
-
-  Widget _normalFloatingActionButton(bool isError) {
+  // FAB for the normal on/off/loading state (also on sensors)
+  Widget _refreshFloatingActionButton(bool isSensor) {
     return GestureDetector(
-      onLongPress: isError ? null : () => context.read<LedRing>().reset(),
+      onLongPress: () {
+        if (!isSensor) context.read<LedRing>().reset();
+      },
       child: FloatingActionButton(
-        onPressed: () => context.read<LedRing>().refresh(),
-        child: Icon(
-          Icons.refresh,
-        ),
+        onPressed: () {
+          if (isSensor) {
+            context
+                .read<FloatingActionButtonEvents>()
+                .floatingActionButtonPressed();
+          } else {
+            context.read<LedRing>().refresh();
+          }
+        },
+        child: Icon(Icons.refresh),
       ),
     );
   }
 
-  Widget _animationStopFloatingActionButton() {
+  // FAB for AnimationControl in on/off/loading state
+  Widget _startAnimationFloatingActionButton() {
     return FloatingActionButton(
-      onPressed: () => context
-          .read<FloatingActionButtonEvents>()
-          .floatingActionButtonPressed(),
-      child: Icon(
-        Icons.stop,
-      ),
+      key: ValueKey('Start animation'),
+      backgroundColor: Colors.green,
+      onPressed: () {
+        context
+            .read<FloatingActionButtonEvents>()
+            .floatingActionButtonPressed();
+      },
+      child: Icon(Icons.play_arrow),
+    );
+  }
+
+  // FAB for error state (global)
+  Widget _errorFloatingActionButton() {
+    return FloatingActionButton(
+      key: ValueKey('Error'),
+      backgroundColor: Colors.red,
+      onPressed: () {
+        context.read<LedRing>().refresh();
+      },
+      child: Icon(Icons.refresh),
+    );
+  }
+
+  // FAB for animating state
+  Widget _animatingStopFloatingActionButton() {
+    return FloatingActionButton(
+      key: ValueKey('Stop animation'),
+      backgroundColor: Colors.orange,
+      onPressed: () {
+        context
+            .read<FloatingActionButtonEvents>()
+            .floatingActionButtonPressed();
+      },
+      child: Icon(Icons.stop),
     );
   }
 
   Widget _floatingActionButton(int tabIndex, LedState ledState) {
     if (ledState == LedState.animating &&
         iconShouldBeOverriddenByAnimationStopper[tabIndex]) {
-      return _animationStopFloatingActionButton();
+      return _animatingStopFloatingActionButton();
     }
 
-    final customIcon = tabIconList[tabIndex];
-    if (customIcon != null) return _customTabFloatingActionButton(customIcon);
+    if (ledState == LedState.connectionError) {
+      return _errorFloatingActionButton();
+    }
 
-    return _normalFloatingActionButton(ledState == LedState.connectionError);
+    if (tabIndex == 2) {
+      return _startAnimationFloatingActionButton();
+    }
+    return _refreshFloatingActionButton(tabIndex == 3);
   }
 
   @override
@@ -238,7 +260,6 @@ class _TabbedHomePageState extends State<TabbedHomePage>
             ..._modalBarrier(tabIndex, ledRing),
         ],
       ),
-      // TODO: Only turn, when really switches (from green to blue, new icon)
       floatingActionButton: AnimatedSwitcher(
         duration: Duration(milliseconds: 300),
         transitionBuilder: (child, animation) => RotationTransition(
