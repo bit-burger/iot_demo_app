@@ -33,6 +33,9 @@ class _AnimationControlPageState extends State<AnimationControlPage>
 
   late double _newFrameTime;
   late int _repeat;
+
+  late ScrollController _scrollController;
+
   Timer? _animationTimer;
 
   bool get noFrames => _animationFrames.length == 0;
@@ -197,8 +200,15 @@ class _AnimationControlPageState extends State<AnimationControlPage>
                 onPressed: noFrames ? null : () => setState(_deleteFrame),
                 onLongPress: noFrames
                     ? null
-                    : () => setState(
-                        () => _deleteFrame(0, _animationFrames.length)),
+                    : () {
+                        setState(
+                            () => _deleteFrame(0, _animationFrames.length));
+                        _scrollController.animateTo(
+                          0,
+                          duration: Duration(milliseconds: 1000),
+                          curve: Curves.easeOut,
+                        );
+                      },
               ),
               TextButton(
                 child: Text('Duplicate last'),
@@ -448,6 +458,7 @@ class _AnimationControlPageState extends State<AnimationControlPage>
     super.build(context);
     return Scaffold(
       body: ImplicitlyAnimatedReorderableList<LedFrame>(
+        controller: _scrollController,
         items: _animationFrames,
         areItemsTheSame: (oldItem, newItem) => identical(oldItem, newItem),
         onReorderFinished: (_, __, ___, newItems) {
@@ -491,6 +502,8 @@ class _AnimationControlPageState extends State<AnimationControlPage>
       }
     });
 
+    _scrollController = ScrollController();
+
     super.initState();
   }
 
@@ -503,6 +516,7 @@ class _AnimationControlPageState extends State<AnimationControlPage>
         errorMessage,
       ),
       backgroundColor: Colors.red,
+      duration: Duration(milliseconds: 850),
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
