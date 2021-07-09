@@ -29,7 +29,7 @@ class _SensorsPageState extends State<SensorsPage>
             Divider(),
             ListTile(
               title: Text(
-                'Humidity: ' + sensors.sensorData.temperature,
+                'Humidity: ' + sensors.sensorData.humidity,
               ),
             ),
           ],
