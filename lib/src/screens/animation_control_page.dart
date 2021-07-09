@@ -353,8 +353,10 @@ class _AnimationControlPageState extends State<AnimationControlPage>
               Scaffold.of(context).showBodyScrim(true, 0.2);
               Scaffold.of(context).showBottomSheet(
                 (context) => CircleColorPickerModalSheet(
+                  initialTime: ledFrame.time,
                   initialColorValues: ledFrame.toColorList(),
-                  dismiss: () {
+                  dismiss: (newTime) {
+                    ledFrame.time = newTime;
                     Navigator.of(context).pop();
                     Scaffold.of(context).showBodyScrim(false, 0);
                   },
