@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:iot_app/src/models/led_state.dart';
 import 'package:iot_app/src/providers/floating_action_button_events.dart';
@@ -9,6 +10,7 @@ import 'color_control_page.dart';
 import 'sensors_page.dart';
 import 'settings_page.dart';
 import 'led_control_page.dart';
+import 'package:iot_app/constants.dart' as constants show isDesktop;
 
 class TabbedHomePage extends StatefulWidget {
   TabbedHomePage();
@@ -83,7 +85,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
       case LedState.off:
         return _titledAction(
           title:
-              'The leds are off, press the button below to turn them on again',
+          'The leds are off, press the button below to turn them on again',
           action: _coloredButtonAction(
             title: 'Turn on',
             onPressed: () => ledRing.turnOn(),
@@ -94,7 +96,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
       case LedState.animating:
         return _titledAction(
             title:
-                'The leds are animating, press the button below to stop animating',
+            'The leds are animating, press the button below to stop animating',
             action: Padding(
               padding: EdgeInsets.only(right: 50),
               child: Wrap(
@@ -222,27 +224,41 @@ class _TabbedHomePageState extends State<TabbedHomePage>
     return _refreshFloatingActionButton(tabIndex == 3);
   }
 
+  PreferredSizeWidget _buildAppBar() {
+    final tabBar = TabBar(
+      controller: _tabController,
+      isScrollable: true,
+      tabs: [
+        Tab(text: 'LEDControl'),
+        Tab(text: 'ColorControl'),
+        Tab(text: 'AnimationControl'),
+        Tab(text: 'Sensors'),
+        Tab(text: 'Settings'),
+      ],
+    );
+
+    if (constants.isDesktop)
+      return PreferredSize(
+        preferredSize: tabBar.preferredSize,
+        child: Container(
+          color: Colors.blue,
+          child: tabBar,
+        ),
+      );
+    return AppBar(
+      leading: SizedBox(),
+      title: const Text('IOT-Control-App'),
+      bottom: tabBar,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final tabIndex = context.watch<TabViewIndex>().index;
     final ledRing = context.watch<LedRing>();
 
     return Scaffold(
-      appBar: AppBar(
-        leading: SizedBox(),
-        title: const Text('IOT-Control-App'),
-        bottom: TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          tabs: [
-            Tab(text: 'LEDControl'),
-            Tab(text: 'ColorControl'),
-            Tab(text: 'AnimationControl'),
-            Tab(text: 'Sensors'),
-            Tab(text: 'Settings'),
-          ],
-        ),
-      ),
+      appBar: _buildAppBar(),
       body: Stack(
         children: [
           TabBarView(
