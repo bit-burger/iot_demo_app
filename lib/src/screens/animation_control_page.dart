@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:iot_app/constants.dart' as constants;
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:implicitly_animated_reorderable_list/implicitly_animated_reorderable_list.dart';
 import 'package:implicitly_animated_reorderable_list/transitions.dart';
@@ -248,16 +248,14 @@ class _AnimationControlPageState extends State<AnimationControlPage>
             ),
           ),
           Slider.adaptive(
-            min: 0,
+            min: 0.01,
             max: 10,
-            divisions: 40,
             value: _newFrameTime,
             label: _newFrameTime.toString(),
             onChanged: (v) {
               if (v == 0) return;
-              HapticFeedback.selectionClick();
               setState(() {
-                _newFrameTime = v;
+                _newFrameTime = ((v * 100).toInt() / 100).toDouble();
                 context.read<Preferences>().newFrameTime = _newFrameTime;
               });
             },
@@ -287,7 +285,6 @@ class _AnimationControlPageState extends State<AnimationControlPage>
             value: _repeat.toDouble(),
             label: _repeat.toString(),
             onChanged: (v) {
-              HapticFeedback.selectionClick();
               setState(() {
                 _repeat = v.toInt();
                 context.read<Preferences>().frameRepeat = _repeat;
@@ -449,7 +446,6 @@ class _AnimationControlPageState extends State<AnimationControlPage>
     super.build(context);
     return Scaffold(
       body: ImplicitlyAnimatedReorderableList<LedFrame>(
-        // key: globalKey,
         items: _animationFrames,
         areItemsTheSame: (oldItem, newItem) => identical(oldItem, newItem),
         onReorderFinished: (_, __, ___, newItems) {
@@ -556,7 +552,9 @@ class _AnimationControlPageState extends State<AnimationControlPage>
     if (result.isValue) {
       ledRing.startedAnimating();
       final secondsTillAnimationStop = _animationFrames.fold<double>(
-              0, (previousValue, frame) => previousValue += frame.time) *
+              0,
+              (previousValue, frame) => previousValue +=
+                  frame.time + constants.animationFrameBufferTime) *
           _repeat.toDouble();
       _animationTimer = Timer(
         Duration(milliseconds: (secondsTillAnimationStop * 1000).toInt()),
