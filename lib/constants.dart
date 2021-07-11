@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:flutter/rendering.dart';
+
 const String defaultUrl = 'http://iot-controller';
 
 const int defaultTabIndex = 1;
@@ -15,3 +17,5 @@ final RegExp urlRegex =
 
 final bool isDesktop =
     Platform.isMacOS || Platform.isWindows || Platform.isLinux;
+
+const Size minDesktopWindowSize = const Size(763, 569);

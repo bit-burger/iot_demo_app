@@ -8,15 +8,17 @@ import 'package:iot_app/src/providers/sensors.dart';
 import 'package:iot_app/src/screens/tabbed_home_page.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'constants.dart' as constants show isDesktop;
-import 'package:desktop_window/desktop_window.dart';
+import 'constants.dart' as constants show minDesktopWindowSize;
+import 'package:bitsdojo_window/bitsdojo_window.dart' as Desktop;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  if (constants.isDesktop) {
-    DesktopWindow.setMinWindowSize(Size(763, 569));
-  }
+  Desktop.doWhenWindowReady(() {
+    final window = Desktop.appWindow;
+    window.minSize = constants.minDesktopWindowSize;
+    window.show();
+  });
 
   Provider.debugCheckInvalidValueType = null;
   Preferences.sharedPreferences = await SharedPreferences.getInstance();

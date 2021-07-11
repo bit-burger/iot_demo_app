@@ -10,6 +10,7 @@ import 'color_control_page.dart';
 import 'sensors_page.dart';
 import 'settings_page.dart';
 import 'led_control_page.dart';
+import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:iot_app/constants.dart' as constants show isDesktop;
 
 class TabbedHomePage extends StatefulWidget {
@@ -225,31 +226,30 @@ class _TabbedHomePageState extends State<TabbedHomePage>
   }
 
   PreferredSizeWidget _buildAppBar() {
-    final tabBar = TabBar(
-      controller: _tabController,
-      isScrollable: true,
-      tabs: [
-        Tab(text: 'LEDControl'),
-        Tab(text: 'ColorControl'),
-        Tab(text: 'AnimationControl'),
-        Tab(text: 'Sensors'),
-        Tab(text: 'Settings'),
-      ],
+    final appBar = AppBar(
+      leading: SizedBox(),
+      title: const Text('IOT-Control-App'),
+      bottom: TabBar(
+        controller: _tabController,
+        isScrollable: true,
+        tabs: [
+          Tab(text: 'LEDControl'),
+          Tab(text: 'ColorControl'),
+          Tab(text: 'AnimationControl'),
+          Tab(text: 'Sensors'),
+          Tab(text: 'Settings'),
+        ],
+      ),
     );
 
     if (constants.isDesktop)
       return PreferredSize(
-        preferredSize: tabBar.preferredSize,
-        child: Container(
-          color: Colors.blue,
-          child: tabBar,
+        preferredSize: appBar.preferredSize,
+        child: MoveWindow(
+          child: appBar,
         ),
       );
-    return AppBar(
-      leading: SizedBox(),
-      title: const Text('IOT-Control-App'),
-      bottom: tabBar,
-    );
+    return appBar;
   }
 
   @override
