@@ -302,7 +302,7 @@ class _AnimationControlPageState extends State<AnimationControlPage>
             },
           ),
           SizedBox(
-            height: MediaQuery.of(context).padding.bottom + 200,
+            height: MediaQuery.of(context).viewPadding.bottom + 200,
           ),
         ],
       ),
@@ -360,18 +360,14 @@ class _AnimationControlPageState extends State<AnimationControlPage>
           animation: dragAnimation,
           child: ColorListTile(
             onPressed: () {
-              Scaffold.of(context).showBodyScrim(true, 0.2);
+              final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
               Scaffold.of(context).showBottomSheet(
                 (context) => CircleColorPickerModalSheet(
                   initialTime: ledFrame.time,
                   initialColorValues: ledFrame.toColorList(),
-                  dismiss: (newTime) {
-                    ledFrame.time = newTime;
-                    Navigator.of(context).pop();
-                    Scaffold.of(context).showBodyScrim(false, 0);
-                  },
                   onChangedColors: (int? ledIndex, Color newColor) =>
                       setState(() => _changeColor(index, ledIndex, newColor)),
+                  bottomPadding: bottomPadding,
                 ),
                 backgroundColor: Colors.transparent,
               );

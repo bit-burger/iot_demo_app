@@ -13,30 +13,33 @@ class ColorControlPage extends StatefulWidget {
 class _ColorControlPageState extends State<ColorControlPage> {
   @override
   Widget build(BuildContext context) {
-    return Consumer<LedRing>(
-      builder: (context, ledsModel, _) {
-        return Stack(
-          children: [
-            SafeArea(
-              child: Center(
+    final ledRing = context.watch<LedRing>();
+    return Stack(
+      children: [
+        SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(32.0),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: 500),
                 child: MultipleCircleColorPicker(
-                  selectedColors: ledsModel.ledConfiguration.ledValues
+                  selectedColors: ledRing.ledConfiguration.ledValues
                       .map((e) => e.toColor())
                       .toList(growable: false),
                   onColorChanged: (int index, Color newColor) {
-                    ledsModel.updateLed(index, Led.fromColor(newColor));
+                    ledRing.updateLed(index, Led.fromColor(newColor));
                     Navigator.of(context).pop();
                   },
                   onAllColorsChanged: (Color newColor) {
-                    ledsModel.updateLeds(Leds.all(Led.fromColor(newColor)));
+                    ledRing.updateLeds(Leds.all(Led.fromColor(newColor)));
                     Navigator.of(context).pop();
                   },
                 ),
               ),
             ),
-          ],
-        );
-      },
+          ),
+        ),
+      ],
     );
   }
 }

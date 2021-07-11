@@ -1,57 +1,70 @@
 import 'package:flutter/material.dart';
 import 'circle_color_picker.dart';
-// ignore: import_of_legacy_library_into_null_safe
-import 'circle_widget_layout.dart';
+
+import 'dart:math' as math;
 
 class MultipleCircleColorPicker extends StatelessWidget {
   final List<Color> selectedColors;
   final void Function(int index, Color newColor) onColorChanged;
   final void Function(Color newColor) onAllColorsChanged;
-  final int radius;
-  final int pickerSize;
 
   MultipleCircleColorPicker({
     required this.selectedColors,
     required this.onColorChanged,
     required this.onAllColorsChanged,
-    this.radius = 105,
-    this.pickerSize = 105,
   });
 
-  Widget _getColorPicker(BuildContext context, int index) {
+  bool _areAllColorsTheSame(List<Color> colors) {
+    if (colors.length == 0) return true;
+    Color lastColor = colors[0];
+    for (var i = 1; i < colors.length; i++) {
+      if (lastColor.value != colors[i].value) return false;
+    }
+    return true;
+  }
+
+  Widget _getColorPicker(int index) {
     return CircleColorPicker(
       selectedColor: selectedColors[index],
       onColorChange: (Color newColor) => onColorChanged(index, newColor),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final padding =
-        (MediaQuery.of(context).size.width - radius - pickerSize* 1.5 + 10) / 2;
-    return Padding(
-      padding: EdgeInsets.all(padding),
-      child: CircleFloatingButton.completeCircle(
-        radius: 105,
+  Widget _buildCenterColorPicker() => Center(
         child: CircleColorPicker(
-          selectedColor: selectedColors.allSame() ? selectedColors.first : null,
+          selectedColor: _areAllColorsTheSame(selectedColors)
+              ? selectedColors.first
+              : null,
           onColorChange: onAllColorsChanged,
         ),
-        items: List.generate(12, (index) => _getColorPicker(context, index))
-            .reversed
-            .toList(),
+      );
+
+  Widget _getCircleElement(int number) {
+    assert(number >= 0 && number <= 5);
+    return Transform.rotate(
+      angle: math.pi / 6 * (number),
+      child: SizedBox.expand(
+        child: Column(
+          children: [
+            _getColorPicker(number),
+            Spacer(),
+            _getColorPicker(6 + number),
+          ],
+        ),
       ),
     );
   }
-}
 
-extension on List<Color> {
-  bool allSame() {
-    if (this.length == 0) return true;
-    Color lastColor = this[0];
-    for (var i = 1; i < this.length; i++) {
-      if (lastColor.value != this[i].value) return false;
-    }
-    return true;
+  @override
+  Widget build(BuildContext context) {
+    return AspectRatio(
+      aspectRatio: 1,
+      child: Stack(
+        children: [
+          _buildCenterColorPicker(),
+          ...List.generate(6, (index) => _getCircleElement(index)),
+        ],
+      ),
+    );
   }
 }

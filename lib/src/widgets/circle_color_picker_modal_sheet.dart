@@ -8,13 +8,13 @@ class CircleColorPickerModalSheet extends StatefulWidget {
     required this.initialColorValues,
     required this.initialTime,
     required this.onChangedColors,
-    required this.dismiss,
+    required this.bottomPadding,
   });
 
   final List<Color> initialColorValues;
   final double initialTime;
   final void Function(int?, Color) onChangedColors;
-  final void Function(double newTime) dismiss;
+  final double bottomPadding;
 
   @override
   _CircleColorPickerModalSheetState createState() =>
@@ -22,7 +22,8 @@ class CircleColorPickerModalSheet extends StatefulWidget {
 }
 
 class _CircleColorPickerModalSheetState
-    extends State<CircleColorPickerModalSheet> {
+    extends State<CircleColorPickerModalSheet>
+    with SingleTickerProviderStateMixin {
   late List<Color> _colorValues;
   late double _time;
 
@@ -38,19 +39,21 @@ class _CircleColorPickerModalSheetState
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Expanded(
+        Flexible(
           child: GestureDetector(
-            onTap: () => widget.dismiss(_time),
+            onTap: () {
+              Navigator.pop(context);
+            },
           ),
         ),
         Container(
-          height: 450,
-          padding: EdgeInsets.only(bottom: 0),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Padding(
                       padding: EdgeInsets.only(left: 5, top: 24),
@@ -66,6 +69,8 @@ class _CircleColorPickerModalSheetState
                       ),
                     ),
                     Slider.adaptive(
+                      min: 0.01,
+                      max: 10,
                       value: _time,
                       onChanged: (v) {
                         setState(() {
@@ -76,33 +81,39 @@ class _CircleColorPickerModalSheetState
                   ],
                 ),
               ),
-              Expanded(
-                child: Align(
-                  alignment: Alignment.topCenter,
-                  child: MultipleCircleColorPicker(
-                    selectedColors: _colorValues,
-                    onAllColorsChanged: (newColor) {
-                      setState(() {
-                        _colorValues =
-                            List<Color>.generate(12, (index) => newColor);
-                        widget.onChangedColors(null, newColor);
-                        Navigator.of(context).pop();
-                      });
-                    },
-                    onColorChanged: (int index, Color newColor) {
-                      setState(() {
-                        _colorValues[index] = newColor;
-                        widget.onChangedColors(index, newColor);
-                        Navigator.of(context).pop();
-                      });
-                    },
-                  ),
+              Padding(
+                padding: EdgeInsets.all(32)
+                    .copyWith(top: 16)
+                    .add(EdgeInsets.only(bottom: widget.bottomPadding)),
+                child: MultipleCircleColorPicker(
+                  selectedColors: _colorValues,
+                  onAllColorsChanged: (newColor) {
+                    setState(() {
+                      _colorValues =
+                          List<Color>.generate(12, (index) => newColor);
+                      widget.onChangedColors(null, newColor);
+                      Navigator.of(context).pop();
+                    });
+                  },
+                  onColorChanged: (int index, Color newColor) {
+                    setState(() {
+                      _colorValues[index] = newColor;
+                      widget.onChangedColors(index, newColor);
+                      Navigator.of(context).pop();
+                    });
+                  },
                 ),
               ),
             ],
           ),
           decoration: BoxDecoration(
             color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black38,
+                blurRadius: 8.0,
+              ),
+            ],
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(24),
               topRight: Radius.circular(24),
