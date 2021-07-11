@@ -115,7 +115,7 @@ class LedRing extends ChangeNotifier {
     }
     try {
       final leds = await updatingTask();
-      if (forceOverrideConfiguration) {
+      if (forceOverrideConfiguration || _ledConfiguration.isOff) {
         _setLedConfiguration(leds);
       }
       updateLedStateFromLeds(leds);

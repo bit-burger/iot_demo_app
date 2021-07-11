@@ -274,7 +274,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
           ),
           if (statesList[tabIndex].contains(ledRing.state) &&
               (ledRing.state != LedState.off ||
-                  !ledRing.ledConfiguration.isCompletelyOnOrOff))
+                  !ledRing.ledConfiguration.isOff))
             ..._modalBarrier(tabIndex, ledRing),
         ],
       ),
