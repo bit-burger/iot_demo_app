@@ -33,7 +33,6 @@ dependencies:
   http: ^0.13.3
   o_color_picker: ^1.0.1
   o_popup: ^1.0.0
-  radial_button: ^1.0.0+1
   implicitly_animated_reorderable_list: ^0.4.0
   flutter_slidable: ^0.6.0
   shared_preferences: ^2.0.6

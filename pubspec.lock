@@ -310,20 +310,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.0"
-  radial_button:
-    dependency: "direct main"
-    description:
-      name: radial_button
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.0+1"
-  rxdart:
-    dependency: transitive
-    description:
-      name: rxdart
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.25.0"
   shared_preferences:
     dependency: "direct main"
     description:
