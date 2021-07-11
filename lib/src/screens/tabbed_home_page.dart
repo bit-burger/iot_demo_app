@@ -85,7 +85,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
       case LedState.off:
         return _titledAction(
           title:
-          'The leds are off, press the button below to turn them on again',
+              'The leds are off, press the button below to turn them on again',
           action: _coloredButtonAction(
             title: 'Turn on',
             onPressed: () => ledRing.turnOn(),
@@ -96,7 +96,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
       case LedState.animating:
         return _titledAction(
             title:
-            'The leds are animating, press the button below to stop animating',
+                'The leds are animating, press the button below to stop animating',
             action: Padding(
               padding: EdgeInsets.only(right: 50),
               child: Wrap(
@@ -272,7 +272,9 @@ class _TabbedHomePageState extends State<TabbedHomePage>
               SettingsPage(),
             ],
           ),
-          if (statesList[tabIndex].contains(ledRing.state))
+          if (statesList[tabIndex].contains(ledRing.state) &&
+              (ledRing.state != LedState.off ||
+                  !ledRing.ledConfiguration.isCompletelyOnOrOff))
             ..._modalBarrier(tabIndex, ledRing),
         ],
       ),
