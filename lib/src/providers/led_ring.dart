@@ -59,11 +59,10 @@ class LedRing extends ChangeNotifier {
     assert(isActive);
     final ledCopy = _ledConfiguration.copy();
     ledCopy.ledValues[replacingLedPosition] = replacingLed;
-    _updateLeds(() => _setLeds(ledCopy));
+    updateLeds(ledCopy);
   }
 
   void updateLeds(Leds newLeds) {
-    assert(isOn);
     _updateLeds(
       () => _setLeds(newLeds),
       forceOverrideConfiguration: true,
@@ -101,7 +100,7 @@ class LedRing extends ChangeNotifier {
   void stoppedAnimating() {
     if (_ledState != LedState.animating && _ledState != LedState.loading)
       return;
-    _ledState = _ledConfiguration.isOff ? LedState.off : LedState.on;
+    updateLedStateFromLeds(ledConfiguration);
     nL();
   }
 
@@ -116,13 +115,10 @@ class LedRing extends ChangeNotifier {
     }
     try {
       final leds = await updatingTask();
-      if (!leds.isCompletelyOnOrOff) {
-        _ledState = LedState.on;
+      if (forceOverrideConfiguration) {
         _setLedConfiguration(leds);
-      } else {
-        if (forceOverrideConfiguration) _setLedConfiguration(leds);
-        _ledState = leds.isOff ? LedState.off : LedState.on;
       }
+      updateLedStateFromLeds(leds);
     } on MicroControllerErrors catch (e) {
       if (e == MicroControllerErrors.AnimationError) {
         _ledState = LedState.animating;
@@ -131,6 +127,16 @@ class LedRing extends ChangeNotifier {
       }
     }
     nL();
+  }
+
+  void updateLedStateFromLeds(Leds leds) {
+    if (!leds.isCompletelyOnOrOff) {
+      _ledState = LedState.on;
+    } else if (leds.isOff) {
+      _ledState = LedState.off;
+    } else {
+      _ledState = LedState.on;
+    }
   }
 
   Future<Leds> _getLeds() async {
